@@ -1,0 +1,97 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body,
+html {
+  height: 100%;
+  background-color: #f7f9fc;
+}
+
+.register-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+.register-form {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.register-form h2 {
+  text-align: center;
+  color: #2d3436;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.register-form input {
+  padding: 0.9rem 1rem;
+  border-radius: 10px;
+  border: 1px solid #dcdde1;
+  font-size: 1rem;
+  background-color: #f5f6fa;
+  transition: border 0.3s;
+}
+
+.register-form input:focus {
+  border-color: #0984e3;
+  background-color: white;
+  outline: none;
+}
+
+.register-form button {
+  padding: 0.9rem;
+  background-color: #0984e3;
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.register-form button:hover {
+  background-color: #0652dd;
+}
+
+.error-message {
+  background-color: #ffe6e6;
+  color: #d63031;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+.login-link {
+  text-align: center;
+  font-size: 0.95rem;
+  color: #636e72;
+}
+
+.login-link a {
+  color: #0984e3;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.login-link a:hover {
+  text-decoration: underline;
+}

@@ -1,0 +1,231 @@
+/* .dashboard-container {
+  display: flex;
+  height: 100vh;
+  background: linear-gradient(to right, #f7f8fc, #e9ebf0);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.sidebar {
+  width: 250px;
+  background: #3f51b5;
+  color: white;
+  padding: 20px;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  transition: background 0.3s;
+}
+
+.profile-header:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.small-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #3f51b5;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+.profile-text {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.submenu {
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
+}
+
+.submenu li {
+  margin-bottom: 15px;
+  cursor: pointer;
+  transition: all 0.3s;
+  padding: 8px 10px;
+  border-radius: 5px;
+}
+
+.submenu li:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.content {
+  flex: 1;
+  padding: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.edit-form {
+  background: #ffffff;
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 500px;
+}
+
+.edit-form input {
+  margin-bottom: 20px;
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  width: 100%;
+}
+
+.edit-form button {
+  padding: 12px;
+  font-size: 16px;
+  background: #3f51b5;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.edit-form button:hover {
+  background: #283593;
+} */
+
+.dashboard-container {
+  display: flex;
+  height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.sidebar {
+  width: 260px;
+  background-color: #2f3e46;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  position: relative;
+}
+
+.sidebar-header h2 {
+  margin: 0 0 20px;
+  font-size: 22px;
+}
+
+.nav-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tab-item {
+  padding: 10px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.tab-item:hover,
+.tab-item.active {
+  background-color: #3f4f56;
+}
+
+.profile-section {
+  margin-top: auto;
+  cursor: pointer;
+  padding-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-top: 1px solid #4f5d63;
+}
+
+.small-avatar {
+  background-color: #ff9800;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 18px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-text {
+  font-size: 14px;
+}
+
+.submenu {
+  list-style: none;
+  padding: 10px;
+  background: #4b5a61;
+  position: absolute;
+  bottom: 70px;
+  left: 20px;
+  width: 200px;
+  border-radius: 6px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.submenu li {
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #5d6b70;
+}
+
+.submenu li:last-child {
+  border-bottom: none;
+}
+
+.submenu li:hover {
+  background-color: #5c6c73;
+}
+
+.content {
+  flex: 1;
+  padding: 30px;
+  background-color: #f9f9f9;
+  overflow-y: auto;
+}
+
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-width: 400px;
+}
+
+.edit-form input {
+  padding: 10px;
+  font-size: 16px;
+}
+
+.edit-form button {
+  padding: 10px;
+  font-size: 16px;
+  background-color: #0077cc;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.edit-form button:hover {
+  background-color: #005fa3;
+}
