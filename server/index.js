@@ -17,10 +17,11 @@ app.use('/api/both',filefolderRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/folders', folderRoutes);
 app.use('/api/files', fileRoutes);
-app.get("/api/auth/me", protect, async (req, res) => {
-  const user = req.user; 
-  res.json({ user });
-});
+// app.get("/api/auth/me", protect, async (req, res) => {
+//   const user = req.user; 
+//   res.json({ user });
+// });
+
 
 createUsersTable();
 createFoldersTable();

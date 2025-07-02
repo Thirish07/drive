@@ -32,6 +32,7 @@ router.post('/login', [
 router.put('/edit', protect, authController.editUser);
 router.post('/logout', protect, authController.logout);
 router.delete('/delete', protect, authController.deleteAccount);
+router.get('/me',protect,authController.dashboard);
 
 router.post('/forgot-password', authController.forgotPassword);
 router.post('/reset-password', authController.resetPassword);

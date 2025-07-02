@@ -65,22 +65,7 @@ exports.verifyOTP = async (req, res) => {
   }
 };
 
-// exports.verifyOTP = async (req, res) => {
-//   const { email, otp } = req.body;
-//   try {
-//     const storedOTP = await redisClient.get(email);
-//     if (!storedOTP || storedOTP !== otp) {
-//       return res.status(400).json({ error: 'Invalid or expired OTP.' });
-//     }
 
-//     await pool.query('UPDATE users SET is_verified = true WHERE email = $1', [email]);
-//     await redisClient.del(email);
-
-//     res.status(200).json({ message: 'OTP verified successfully.' });
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
 
 // Resend OTP
 exports.resendOTP = async (req, res) => {
@@ -124,6 +109,27 @@ exports.login = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+};
+
+
+//auth//me
+exports.dashboard = async(req,res)=>{
+   try {
+    const result = await pool.query(
+      "SELECT id, username, firstname, lastname, phone_no FROM users WHERE id = $1",
+      [req.user.userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({ user: result.rows[0] });
+  } catch (err) {
+    console.error("Error in /me:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+
 };
 
 

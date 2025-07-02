@@ -73,7 +73,7 @@ const DashboardPage = () => {
         <div className="profile-section" onClick={() => setShowMenu(!showMenu)}>
           <div className="small-avatar">{user.firstname?.charAt(0)}</div>
           <div className="profile-text">
-            Hi, {user.firstname} ▾
+             Hi, {user.firstname ? user.firstname : user.username} ▾
           </div>
         </div>
 
