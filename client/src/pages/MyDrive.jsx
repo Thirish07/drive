@@ -373,14 +373,40 @@ const MyDrive = ({ activeTab }) => {
   };
 
 
+  // const renderFolderOptions = (tree, level = 0) => {
+  //   return tree.flatMap((folder) => [
+  //     <option key={folder.id} value={folder.id}>
+  //       {"‣".repeat(level)} {folder.name}
+  //     </option>,
+  //     ...(folder.children ? renderFolderOptions(folder.children, level + 1) : []),
+  //   ]);
+  // };
   const renderFolderOptions = (tree, level = 0) => {
-    return tree.flatMap((folder) => [
+  return tree.flatMap((folder) => {
+    const isInvalidMoveTarget =
+      moveSourceFolderId &&
+      (folder.id === moveSourceFolderId || isDescendant(folder, moveSourceFolderId));
+
+    if (isInvalidMoveTarget) return [];
+
+    return [
       <option key={folder.id} value={folder.id}>
         {"‣".repeat(level)} {folder.name}
       </option>,
       ...(folder.children ? renderFolderOptions(folder.children, level + 1) : []),
-    ]);
-  };
+    ];
+  });
+};
+const isDescendant = (folder, sourceId) => {
+  if (!folder.children) return false;
+  for (const child of folder.children) {
+    if (child.id === sourceId || isDescendant(child, sourceId)) {
+      return true;
+    }
+  }
+  return false;
+};
+
     
 
   const renderGrid = (items, type = "file", showModified = false, trashMode = false) => {
