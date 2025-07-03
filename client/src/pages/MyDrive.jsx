@@ -27,7 +27,7 @@ const MyDrive = ({ activeTab }) => {
   const [currentFolderId, setCurrentFolderId] = useState(null);
   const [folderHistory, setFolderHistory] = useState([]);
   const [newFolderName, setNewFolderName] = useState("");
-  const [fileToUpload, setFileToUpload] = useState(null);
+  //const [fileToUpload, setFileToUpload] = useState(null);
   const [showNewFolderModal, setShowNewFolderModal] = useState(false);
   const [favorites, setFavorites] = useState({ folders: [], files: [], allFolders: [], allFiles: [] });
   const [recent, setRecent] = useState([]);
@@ -66,18 +66,6 @@ const MyDrive = ({ activeTab }) => {
       console.error("Failed to fetch drive contents:", err);
     }
   };
-
-  // const fetchFavorites = async () => {
-  //   try {
-  //     const res = await API.get("/both/favorites");
-  //     setFavorites({
-  //       folders: res.data.favoriteFolders || [],
-  //       files: res.data.favoriteFiles || [],
-  //     });
-  //   } catch (err) {
-  //     console.error("Failed to fetch favorites:", err);
-  //   }
-  // };
 
  const fetchFavorites = async () => {
   try {
@@ -176,26 +164,27 @@ const MyDrive = ({ activeTab }) => {
     }
   };
 
-  const handleFileChange = (e) => {
-    setFileToUpload(e.target.files[0]);
-  };
+  const handleFileChange = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
 
-  const handleUpload = async () => {
-    if (!fileToUpload) return;
-    try {
-      const metadata = {
-        name: fileToUpload.name,
-        size: fileToUpload.size,
-        type: fileToUpload.type,
-        folder_id: currentFolderId,
-      };
-      await API.post("/files/upload", metadata);
-      setFileToUpload(null);
-      fetchDriveContents();
-    } catch (err) {
-      console.error("Upload failed:", err);
-    }
-  };
+  try {
+    const metadata = {
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      folder_id: currentFolderId,
+    };
+
+    await API.post("/files/upload", metadata);
+    toast.success("File uploaded successfully!");
+    fetchDriveContents();
+  } catch (err) {
+    console.error("Upload failed:", err);
+    toast.error("Upload failed.");
+  }
+};
+
 
   const toggleFavorite = async (id, isFav, type) => {
     try {
@@ -395,14 +384,7 @@ const MyDrive = ({ activeTab }) => {
   };
 
 
-  // const renderFolderOptions = (tree, level = 0) => {
-  //   return tree.flatMap((folder) => [
-  //     <option key={folder.id} value={folder.id}>
-  //       {"‣".repeat(level)} {folder.name}
-  //     </option>,
-  //     ...(folder.children ? renderFolderOptions(folder.children, level + 1) : []),
-  //   ]);
-  // };
+ 
   const renderFolderOptions = (tree, level = 0) => {
   return tree.flatMap((folder) => {
     const isInvalidMoveTarget =
@@ -428,8 +410,6 @@ const isDescendant = (folder, sourceId) => {
   }
   return false;
 };
-
-    
 
   const renderGrid = (items, type = "file", showModified = false, trashMode = false) => {
     return items.map((item) => (
@@ -464,9 +444,7 @@ const isDescendant = (folder, sourceId) => {
 </span>
 <span onClick={(e) => { e.stopPropagation(); openShareModal(item.id, type); }}>
   <Share2 size={16} color="#4caf50" title={`Share ${type}`} />
-</span>
-                  
-                
+</span>          
                 <span onClick={(e) => { e.stopPropagation(); softDelete(item.id, type === "folder" ? "folders" : "files"); }}>
                   <Trash2 size={16} color="#ea4335" title="Delete" />
                 </span>
@@ -506,14 +484,7 @@ const isDescendant = (folder, sourceId) => {
         </>
       );
     }
-    // if (activeTab === "favorites") {
-    //   return (
-    //     <>
-    //       {renderGrid(favorites.folders, "folder")}
-    //       {renderGrid(favorites.files, "file")}
-    //     </>
-    //   );
-    // }
+    
 
    if (activeTab === "favorites") {
   const { allFolders, allFiles } = favorites;
@@ -569,6 +540,7 @@ const isDescendant = (folder, sourceId) => {
   return (
     <div className="mydrive-main">
       <div className="header">
+        
         <h2>
           {activeTab === "favorites"
             ? "Favorites"
@@ -599,28 +571,36 @@ const isDescendant = (folder, sourceId) => {
             <Trash2 size={16} className="icon" /> Empty Trash
           </button>
         )}
-
         {activeTab === "mydrive" && (
-          <div className="toolbar">
-            <button onClick={() => setShowNewFolderModal(true)}>
-              <Plus className="icon" /> New Folder
-            </button>
-            <label className="upload-btn">
-              <UploadCloud className="icon" /> Upload
-              <input type="file" onChange={handleFileChange} hidden />
-            </label>
-            {fileToUpload && (
-              <button className="upload-now" onClick={handleUpload}>
-                Upload Now
-              </button>
-            )}
-            {currentFolderId && (
-              <button onClick={goBack}>
-                <ArrowLeft className="icon" /> Back
-              </button>
-            )}
-          </div>
-        )}
+  <div className="toolbar new-dropdown-wrapper left-align">
+    <div className="dropdown">
+      <button className="dropdown-toggle">
+        <Plus className="icon" /> New
+      </button>
+      <div className="dropdown-menu">
+        <div className="dropdown-item" onClick={() => setShowNewFolderModal(true)}>
+          <Folder className="icon" size={16} /> New Folder
+        </div>
+        <div className="dropdown-item">
+          <label>
+            <UploadCloud className="icon" size={16} /> Upload File
+            <input type="file" onChange={handleFileChange} hidden />
+          </label>
+        </div>
+      </div>
+    </div>
+
+  
+
+    {currentFolderId && (
+      <button onClick={goBack}>
+        <ArrowLeft className="icon" /> Back
+      </button>
+    )}
+  </div>
+)} 
+
+        
       </div>
 
       <div className="grid-view">{displayContent()}</div>
