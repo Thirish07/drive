@@ -252,3 +252,25 @@
   cursor: pointer;
   color: #888;
 }
+.back-button-container {
+  margin-bottom: 1rem;
+}
+
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #f1f3f4;
+  color: #202124;
+  border: 1px solid #dadce0;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.back-button:hover {
+  background-color: #e8eaed;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}

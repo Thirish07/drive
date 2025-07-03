@@ -29,7 +29,7 @@ const MyDrive = ({ activeTab }) => {
   const [newFolderName, setNewFolderName] = useState("");
   const [fileToUpload, setFileToUpload] = useState(null);
   const [showNewFolderModal, setShowNewFolderModal] = useState(false);
-  const [favorites, setFavorites] = useState({ folders: [], files: [] });
+  const [favorites, setFavorites] = useState({ folders: [], files: [], allFolders: [], allFiles: [] });
   const [recent, setRecent] = useState([]);
   const [trashed, setTrashed] = useState({ folders: [], files: [] });
   const [showRenameModal, setShowRenameModal] = useState(false);
@@ -67,17 +67,39 @@ const MyDrive = ({ activeTab }) => {
     }
   };
 
-  const fetchFavorites = async () => {
-    try {
-      const res = await API.get("/both/favorites");
-      setFavorites({
-        folders: res.data.favoriteFolders || [],
-        files: res.data.favoriteFiles || [],
-      });
-    } catch (err) {
-      console.error("Failed to fetch favorites:", err);
-    }
-  };
+  // const fetchFavorites = async () => {
+  //   try {
+  //     const res = await API.get("/both/favorites");
+  //     setFavorites({
+  //       folders: res.data.favoriteFolders || [],
+  //       files: res.data.favoriteFiles || [],
+  //     });
+  //   } catch (err) {
+  //     console.error("Failed to fetch favorites:", err);
+  //   }
+  // };
+
+ const fetchFavorites = async () => {
+  try {
+    const res = await API.get("/both/favorites");
+    const allFolders = res.data.favoriteFolders || [];
+    const allFiles = res.data.favoriteFiles || [];
+
+    const topLevelFolders = allFolders.filter(folder => folder.is_favorite);
+    const topLevelFiles = allFiles.filter(file => file.is_favorite && file.folder_id === null); // or adjust if needed
+
+    setFavorites({
+      folders: topLevelFolders,
+      files: topLevelFiles,
+      allFolders,
+      allFiles
+    });
+  } catch (err) {
+    console.error("Failed to fetch favorites:", err);
+  }
+};
+
+
 
   const fetchRecent = async () => {
     try {
@@ -484,20 +506,46 @@ const isDescendant = (folder, sourceId) => {
         </>
       );
     }
-    if (activeTab === "favorites") {
-      return (
-        <>
-          {renderGrid(favorites.folders, "folder")}
-          {renderGrid(favorites.files, "file")}
-        </>
-      );
-    }
+    // if (activeTab === "favorites") {
+    //   return (
+    //     <>
+    //       {renderGrid(favorites.folders, "folder")}
+    //       {renderGrid(favorites.files, "file")}
+    //     </>
+    //   );
+    // }
+
+   if (activeTab === "favorites") {
+  const { allFolders, allFiles } = favorites;
+
+  const visibleFolders = allFolders.filter(
+    (f) => f.parent_id === currentFolderId
+  );
+  const visibleFiles = allFiles.filter(
+    (f) => f.folder_id === currentFolderId
+  );
+
+  return (
+    <>
+      {currentFolderId && (
+  <div className="back-button-container">
+    <button className="back-button" onClick={goBack}>
+      <ArrowLeft className="icon" size={16} />
+      <span>Back</span>
+    </button>
+  </div>
+)}
+
+      {renderGrid(visibleFolders, "folder")}
+      {renderGrid(visibleFiles, "file")}
+    </>
+  );
+}
+
     if (activeTab === "recent") {
-      const folders = recent.filter((item) => item.type === "folder");
       const files = recent.filter((item) => item.type === "file");
       return (
         <>
-          {renderGrid(folders, "folder", true)}
           {renderGrid(files, "file", true)}
         </>
       );

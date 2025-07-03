@@ -16,7 +16,7 @@ const protect = async (req, res, next) => {
     if (err) return res.status(403).json({ error: 'Invalid token' });
 
     req.user = decoded;
- console.log("✅ Decoded user:", decoded);
+
     // ✅ Add this to confirm user is being attached
     //console.log("✅ protect.js decoded user:", decoded);
 
