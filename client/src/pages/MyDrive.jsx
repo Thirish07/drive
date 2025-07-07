@@ -1,6 +1,6 @@
-
 import React, { useEffect, useState } from "react";
 import API from "../api";
+import InvisibleDropzone from "../components/InvisibleDropzone";
 import debounce from "lodash.debounce";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -27,7 +27,7 @@ const MyDrive = ({ activeTab }) => {
   const [currentFolderId, setCurrentFolderId] = useState(null);
   const [folderHistory, setFolderHistory] = useState([]);
   const [newFolderName, setNewFolderName] = useState("");
-  //const [fileToUpload, setFileToUpload] = useState(null);
+ 
   const [showNewFolderModal, setShowNewFolderModal] = useState(false);
   const [favorites, setFavorites] = useState({ folders: [], files: [], allFolders: [], allFiles: [] });
   const [recent, setRecent] = useState([]);
@@ -39,7 +39,7 @@ const MyDrive = ({ activeTab }) => {
   const [showEmptyTrashModal, setShowEmptyTrashModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState({ folders: [], files: [] });
-
+  const [isDragging, setIsDragging] = useState(false);
   const [showMoveModal, setShowMoveModal] = useState(false);
   const [folderTree, setFolderTree] = useState([]);
   const [moveTargetFolderId, setMoveTargetFolderId] = useState(null);
@@ -86,7 +86,6 @@ const MyDrive = ({ activeTab }) => {
     console.error("Failed to fetch favorites:", err);
   }
 };
-
 
 
   const fetchRecent = async () => {
@@ -163,12 +162,11 @@ const MyDrive = ({ activeTab }) => {
       console.error("Folder creation failed:", err);
     }
   };
+  
 
-  const handleFileChange = async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
 
-  try {
+const handleFileUpload = async (files) => {
+  const uploads = Array.from(files).map(async (file) => {
     const metadata = {
       name: file.name,
       size: file.size,
@@ -176,14 +174,25 @@ const MyDrive = ({ activeTab }) => {
       folder_id: currentFolderId,
     };
 
-    await API.post("/files/upload", metadata);
-    toast.success("File uploaded successfully!");
-    fetchDriveContents();
-  } catch (err) {
-    console.error("Upload failed:", err);
-    toast.error("Upload failed.");
-  }
+    try {
+      await API.post("/files/upload", metadata);
+    } catch (err) {
+      console.error(`Failed to upload ${file.name}:`, err);
+      toast.error(`Upload failed: ${file.name}`);
+    }
+  });
+
+  await Promise.all(uploads);
+  toast.success("Files uploaded successfully!");
+  fetchDriveContents();
 };
+
+const handleFileChange = async (e) => {
+  const files = e.target.files;
+  if (!files || files.length === 0) return;
+  await handleFileUpload(files); 
+};
+
 
 
   const toggleFavorite = async (id, isFav, type) => {
@@ -287,26 +296,29 @@ const MyDrive = ({ activeTab }) => {
     setShowMoveModal(true);
   };
 
-    const confirmMoveFolder = async () => {
-    try {
-      if (moveSourceFolderId) {
-        await API.put(`/folders/update/${moveSourceFolderId}`, {
-          parent_id: moveTargetFolderId,
-        });
-      } else if (moveSourceFileId) {
-        await API.put(`/files/update/${moveSourceFileId}`, {
-          folder_id: moveTargetFolderId,
-        });
-      }
-      setShowMoveModal(false);
-      setMoveSourceFolderId(null);
-      setMoveSourceFileId(null);
-      setMoveTargetFolderId(null);
-      fetchDriveContents();
-    } catch (err) {
-      console.error("Move failed:", err);
+const confirmMoveFolder = async () => {
+  try {
+    const targetId = moveTargetFolderId === "" ? null : moveTargetFolderId;
+
+    if (moveSourceFolderId) {
+      await API.put(`/folders/update/${moveSourceFolderId}`, {
+        parent_id: targetId,
+      });
+    } else if (moveSourceFileId) {
+      await API.put(`/files/update/${moveSourceFileId}`, {
+        folder_id: targetId,
+      });
     }
-  };
+
+    setShowMoveModal(false);
+    setMoveSourceFolderId(null);
+    setMoveSourceFileId(null);
+    setMoveTargetFolderId(null);
+    fetchDriveContents();
+  } catch (err) {
+    console.error("Move failed:", err);
+  }
+};
 
 
    const openShareModal = (id, type) => {
@@ -330,7 +342,7 @@ const MyDrive = ({ activeTab }) => {
     const response = await API.post(
       "/folders/share",
       {
-        folder_id: shareFolderId,   // ✅ use the folder ID you stored earlier
+        folder_id: shareFolderId,   
         email: shareEmail,
         role: shareRole
       },
@@ -342,14 +354,11 @@ const MyDrive = ({ activeTab }) => {
     );
 
     const shareUrl = response.data.shareUrl;
-
     toast.success("Folder shared successfully!");
-
-    // ✅ Show/share/copy URL
     console.log("Shareable URL:", shareUrl);
     await navigator.clipboard.writeText(shareUrl);
     toast.success("Link copied to clipboard!");
-    // ✅ Reset state
+
     setShareEmail('');
     setShareRole('viewer');
     setShowShareModal(false);
@@ -384,23 +393,38 @@ const MyDrive = ({ activeTab }) => {
   };
 
 
- 
-  const renderFolderOptions = (tree, level = 0) => {
-  return tree.flatMap((folder) => {
+const renderFolderOptions = (tree, level = 0) => {
+  const options = [];
+
+  if (level === 0 && currentFolderId !== null) {
+    options.push(
+      <option key="root" value="">
+        📁 My Drive (Root)
+      </option>
+    );
+  }
+
+  tree.forEach((folder) => {
     const isInvalidMoveTarget =
       moveSourceFolderId &&
       (folder.id === moveSourceFolderId || isDescendant(folder, moveSourceFolderId));
 
-    if (isInvalidMoveTarget) return [];
+    if (!isInvalidMoveTarget) {
+      options.push(
+        <option key={folder.id} value={folder.id}>
+          {"‣".repeat(level)} {folder.name}
+        </option>
+      );
 
-    return [
-      <option key={folder.id} value={folder.id}>
-        {"‣".repeat(level)} {folder.name}
-      </option>,
-      ...(folder.children ? renderFolderOptions(folder.children, level + 1) : []),
-    ];
+      if (folder.children && folder.children.length > 0) {
+        options.push(...renderFolderOptions(folder.children, level + 1));
+      }
+    }
   });
+
+  return options;
 };
+
 const isDescendant = (folder, sourceId) => {
   if (!folder.children) return false;
   for (const child of folder.children) {
@@ -538,7 +562,12 @@ const isDescendant = (folder, sourceId) => {
   };
 
   return (
-    <div className="mydrive-main">
+    <div className={`mydrive-main ${isDragging ? "dragging" : ""}`}>
+    <InvisibleDropzone 
+      onDropFiles={handleFileUpload} 
+      setIsDragging={setIsDragging} 
+    />
+
       <div className="header">
         
         <h2>
@@ -572,6 +601,7 @@ const isDescendant = (folder, sourceId) => {
           </button>
         )}
         {activeTab === "mydrive" && (
+          
   <div className="toolbar new-dropdown-wrapper left-align">
     <div className="dropdown">
       <button className="dropdown-toggle">
@@ -590,19 +620,14 @@ const isDescendant = (folder, sourceId) => {
       </div>
     </div>
 
-  
-
     {currentFolderId && (
       <button onClick={goBack}>
         <ArrowLeft className="icon" /> Back
       </button>
     )}
   </div>
-)} 
-
-        
-      </div>
-
+)}   
+  </div>
       <div className="grid-view">{displayContent()}</div>
 
       {showNewFolderModal && (
@@ -640,14 +665,15 @@ const isDescendant = (folder, sourceId) => {
           <div className="modal">
             <h3>Move Item</h3>
             <select
-              value={moveTargetFolderId || ""}
+            
+               value={moveTargetFolderId || ""}
               onChange={(e) => setMoveTargetFolderId(e.target.value)}
             >
               <option value="">-- Select Destination --</option>
               {renderFolderOptions(folderTree)}
             </select>
             <div className="modal-actions">
-              <button onClick={confirmMoveFolder} disabled={!moveTargetFolderId}>Move</button>
+              <button onClick={confirmMoveFolder} disabled={moveTargetFolderId === null || moveTargetFolderId === undefined}>Move</button>
               <button onClick={() => setShowMoveModal(false)}>Cancel</button>
             </div>
           </div>
@@ -707,3 +733,4 @@ const isDescendant = (folder, sourceId) => {
 };
 
 export default MyDrive;
+
