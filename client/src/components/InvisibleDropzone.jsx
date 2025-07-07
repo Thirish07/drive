@@ -1,7 +1,7 @@
-// components/InvisibleDropzone.jsx
+
 import React, { useEffect } from "react";
 
-const InvisibleDropzone = ({ onDropFiles, setIsDragging }) => {
+const InvisibleDropzone = ({ onDropFiles, setIsDragging, onDropItemToRoot }) => {
   useEffect(() => {
     const handleDragEnter = (e) => {
       e.preventDefault();
@@ -24,9 +24,21 @@ const InvisibleDropzone = ({ onDropFiles, setIsDragging }) => {
       e.preventDefault();
       e.stopPropagation();
       setIsDragging?.(false);
+
       const files = Array.from(e.dataTransfer.files);
       if (files.length > 0) {
         onDropFiles(files);
+        return;
+      }
+
+      const raw = e.dataTransfer.getData("application/json");
+      if (raw && onDropItemToRoot) {
+        try {
+          const draggedItem = JSON.parse(raw);
+          onDropItemToRoot(draggedItem);
+        } catch (err) {
+          console.error("Invalid drag data:", err);
+        }
       }
     };
 
@@ -41,9 +53,9 @@ const InvisibleDropzone = ({ onDropFiles, setIsDragging }) => {
       window.removeEventListener("dragleave", handleDragLeave);
       window.removeEventListener("drop", handleDrop);
     };
-  }, [onDropFiles, setIsDragging]);
+  }, [onDropFiles, setIsDragging, onDropItemToRoot]);
 
-  return null; // no visible UI
+  return null;
 };
 
 export default InvisibleDropzone;

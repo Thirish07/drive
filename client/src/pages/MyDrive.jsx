@@ -537,6 +537,25 @@ const renderSingleCard = (item, type = "file") => {
       </>
     );
   };
+  const handleDropToRoot = async (draggedItem) => {
+  try {
+    if (draggedItem.itemType === 'folder') {
+      await API.put(`/folders/update/${draggedItem.id}`, {
+        parent_id: null,
+      });
+    } else if (draggedItem.itemType === 'file') {
+      await API.put(`/files/update/${draggedItem.id}`, {
+        folder_id: null,
+      });
+    }
+    toast.success("Moved to My Drive!");
+    fetchDriveContents();
+  } catch (err) {
+    toast.error("Failed to move to My Drive.");
+    console.error("Drop to root error:", err);
+  }
+};
+
   const handleDragDropMove = async (draggedItem, targetFolderId) => {
   try {
     if (draggedItem.itemType === 'folder') {
@@ -638,10 +657,15 @@ const renderSingleCard = (item, type = "file") => {
 
   return (
     <div className={`mydrive-main ${isDragging ? "dragging" : ""}`}>
-    <InvisibleDropzone 
+    {/* <InvisibleDropzone 
       onDropFiles={handleFileUpload} 
       setIsDragging={setIsDragging} 
-    />
+    /> */}
+    <InvisibleDropzone 
+  onDropFiles={handleFileUpload} 
+  setIsDragging={setIsDragging} 
+  onDropItemToRoot={handleDropToRoot}
+/>
 
       <div className="header">
         
