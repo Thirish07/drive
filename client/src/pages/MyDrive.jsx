@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import API from "../api";
 import InvisibleDropzone from "../components/InvisibleDropzone";
+import DraggableCard from "../components/DraggableCard";
+import DroppableFolderCard from "../components/DroppableFolderCard";
+
 import debounce from "lodash.debounce";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -296,6 +299,7 @@ const handleFileChange = async (e) => {
     setShowMoveModal(true);
   };
 
+
 const confirmMoveFolder = async () => {
   try {
     const targetId = moveTargetFolderId === "" ? null : moveTargetFolderId;
@@ -367,6 +371,9 @@ const confirmMoveFolder = async () => {
     console.error("Share failed:", error);
   }
 };
+
+
+
  const handleShareFile = async () => {
     try {
       const token = localStorage.getItem("accessToken");
@@ -434,6 +441,38 @@ const isDescendant = (folder, sourceId) => {
   }
   return false;
 };
+const renderSingleCard = (item, type = "file") => {
+  return (
+    <div className={`card ${type}`}>
+      <div className="card-header">
+        {type === "folder" ? (
+          <Folder size={36} color="#f4b400" onClick={() => enterFolder(item.id)} />
+        ) : (
+          <FileText size={34} color="#4285f4" />
+        )}
+        <div className="actions">
+          <span onClick={(e) => { e.stopPropagation(); toggleFavorite(item.id, item.is_favorite, type); }} title={item.is_favorite ? "Unmark Favorite" : "Mark as Favorite"}>
+            {item.is_favorite ? <StarOff size={16} color="#fbbc05" /> : <Star size={16} color="#fbbc05" />}
+          </span>
+          <span onClick={(e) => { e.stopPropagation(); openRenameModal(item.id, type === "folder" ? "folders" : "files", item.name); }}>
+            <Pencil size={16} title="Rename" />
+          </span>
+          <span onClick={(e) => { e.stopPropagation(); openMoveModal(item.id, type); }}>
+            <Move size={16} color="#5c6bc0" title={`Move ${type}`} />
+          </span>
+          <span onClick={(e) => { e.stopPropagation(); openShareModal(item.id, type); }}>
+            <Share2 size={16} color="#4caf50" title={`Share ${type}`} />
+          </span>
+          <span onClick={(e) => { e.stopPropagation(); softDelete(item.id, type === "folder" ? "folders" : "files"); }}>
+            <Trash2 size={16} color="#ea4335" title="Delete" />
+          </span>
+        </div>
+      </div>
+      <p>{searchQuery ? highlightMatch(item.name, searchQuery) : item.name}</p>
+    </div>
+  );
+};
+
 
   const renderGrid = (items, type = "file", showModified = false, trashMode = false) => {
     return items.map((item) => (
@@ -498,6 +537,24 @@ const isDescendant = (folder, sourceId) => {
       </>
     );
   };
+  const handleDragDropMove = async (draggedItem, targetFolderId) => {
+  try {
+    if (draggedItem.itemType === 'folder') {
+      await API.put(`/folders/update/${draggedItem.id}`, {
+        parent_id: targetFolderId,
+      });
+    } else if (draggedItem.itemType === 'file') {
+      await API.put(`/files/update/${draggedItem.id}`, {
+        folder_id: targetFolderId,
+      });
+    }
+    toast.success("Item moved successfully!");
+    fetchDriveContents();
+  } catch (err) {
+    toast.error("Move failed!");
+    console.error("Drag move error:", err);
+  }
+};
 
   const displayContent = () => {
     if (searchQuery.trim()) {
@@ -555,8 +612,26 @@ const isDescendant = (folder, sourceId) => {
     }
     return (
       <>
-        {renderGrid(folders, "folder")}
-        {renderGrid(files, "file")}
+        {/* {renderGrid(folders, "folder")}
+        {renderGrid(files, "file")} */}
+        {folders.map((folder) => (
+  <DroppableFolderCard
+    key={folder.id}
+    folder={folder}
+    onDropItem={handleDragDropMove}
+  >
+    <DraggableCard item={folder} type="folder">
+      {renderSingleCard(folder, "folder")}
+    </DraggableCard>
+  </DroppableFolderCard>
+))}
+
+{files.map((file) => (
+  <DraggableCard key={file.id} item={file} type="file">
+    {renderSingleCard(file, "file")}
+  </DraggableCard>
+))}
+
       </>
     );
   };

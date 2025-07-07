@@ -1,5 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 import RegisterPage from "./pages/RegisterPage";
 import VerifyOtpPage from "./pages/VerifyOtpPage";
 import LoginPage from "./pages/LoginPage";
@@ -11,6 +13,7 @@ import SharedView from "./pages/SharedView";
 
 const App = () => {
   return (
+     <DndProvider backend={HTML5Backend}>
     <Router>
       <Routes>
         <Route path="/" element={<RegisterPage />} />
@@ -23,6 +26,7 @@ const App = () => {
         
       </Routes>
     </Router>
+    </DndProvider>
   );
 };
 
