@@ -464,6 +464,9 @@ const renderFolderOptions = (tree, level = 0) => {
 
   return options;
 };
+const handleFileClick = (file) => {
+  window.open(`${import.meta.env.VITE_API_BASE_URL}/files/${file.id}/download`, "_blank");
+};
 
 const isDescendant = (folder, sourceId) => {
   if (!folder.children) return false;
@@ -476,7 +479,19 @@ const isDescendant = (folder, sourceId) => {
 };
 const renderSingleCard = (item, type = "file") => {
   return (
-    <div className={`card ${type}`}>
+    <div
+  className={`card ${type} cursor-pointer`}
+  onClick={() => {
+  if (type === "folder") {
+    enterFolder(item.id);
+    setSearchQuery("");
+    setSearchResults({ folders: [], files: [] });
+  } else if (type === "file") {
+    handleFileClick(item);
+  }
+}}
+  
+>
       <div className="card-header">
         {type === "folder" ? (
           <Folder size={36} color="#f4b400" onClick={() => enterFolder(item.id)} />
@@ -549,7 +564,7 @@ const renderSingleCard = (item, type = "file") => {
           </div>
         </div>
          <p>{searchQuery ? highlightMatch(item.name, searchQuery) : item.name}</p>
-        {/*<p>{item.name}</p>*/}
+       
         {showModified && item.updated_at && (
           <small className="timestamp">Last Modified: {new Date(item.updated_at).toLocaleString()}</small>
         )}
@@ -609,18 +624,29 @@ const renderSingleCard = (item, type = "file") => {
 };
 
   const displayContent = () => {
-    if (searchQuery.trim()) {
-      return (
-        <>
-          {renderGrid(searchResults.folders, "folder")}
-          {renderGrid(searchResults.files, "file")}
-        </>
-      );
-    }
-
-
-
-
+    
+if (searchQuery.trim()) {
+  return (
+    <>
+      {searchResults.folders.map((folder) => (
+        <DroppableFolderCard
+          key={`search-folder-${folder.id}`}
+          folder={folder}
+          onDropItem={handleDragDropMove}
+        >
+          <DraggableCard item={folder} type="folder">
+            {renderSingleCard(folder, "folder")}
+          </DraggableCard>
+        </DroppableFolderCard>
+      ))}
+      {searchResults.files.map((file) => (
+        <DraggableCard key={`search-file-${file.id}`} item={file} type="file">
+          {renderSingleCard(file, "file")}
+        </DraggableCard>
+      ))}
+    </>
+  );
+}
 if (activeTab === "favorites") {
   const { allFolders, allFiles } = favorites;
   const favoritedFolderIds = new Set(allFolders.map(f => f.id));
@@ -683,12 +709,6 @@ if (activeTab === "favorites") {
   }
 }
 
-
-
-
-
-
-
     if (activeTab === "recent") {
       const files = recent.filter((item) => item.type === "file");
       return (
@@ -707,8 +727,7 @@ if (activeTab === "favorites") {
     }
     return (
       <>
-        {/* {renderGrid(folders, "folder")}
-        {renderGrid(files, "file")} */}
+        
         {folders.map((folder) => (
   <DroppableFolderCard
     key={folder.id}
