@@ -733,10 +733,7 @@ if (activeTab === "favorites") {
 
   return (
     <div className={`mydrive-main ${isDragging ? "dragging" : ""}`}>
-    {/* <InvisibleDropzone 
-      onDropFiles={handleFileUpload} 
-      setIsDragging={setIsDragging} 
-    /> */}
+    
     <InvisibleDropzone 
   onDropFiles={handleFileUpload} 
   setIsDragging={setIsDragging} 
@@ -883,7 +880,6 @@ if (activeTab === "favorites") {
     </ul>
   </>
 )}
-
           </div>
         </div>
       )}
