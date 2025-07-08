@@ -5,22 +5,55 @@ const fs = require('fs');
 const { sendEmail } = require("../utils/mailer");
 
 // Upload (metadata only)
+// exports.uploadFile = async (req, res) => {
+//   const { name, type, size, folder_id } = req.body;
+//   const user_id = req.user.userId;
+
+//   try {
+//     const result = await pool.query(
+//       `INSERT INTO files (name, type, size, folder_id, user_id, url)
+//        VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+//       [name, type, size, folder_id || null, user_id, `/dummy/path/${name}`]
+//     );
+
+//     res.status(201).json({ file: result.rows[0] });
+//   } catch (err) {
+//     res.status(500).json({ error: err.message });
+//   }
+// };
 exports.uploadFile = async (req, res) => {
   const { name, type, size, folder_id } = req.body;
   const user_id = req.user.userId;
 
+  const baseName = path.parse(name).name;
+  const extension = path.extname(name);
+  let finalName = name;
+  let counter = 1;
+
   try {
+    // Check for existing files with same name
+    while (true) {
+      const existing = await pool.query(
+        `SELECT 1 FROM files 
+         WHERE name = $1 AND folder_id IS NOT DISTINCT FROM $2 AND user_id = $3 AND deleted = FALSE`,
+        [finalName, folder_id || null, user_id]
+      );
+      if (existing.rowCount === 0) break;
+      finalName = `${baseName} (${counter++})${extension}`;
+    }
+
     const result = await pool.query(
       `INSERT INTO files (name, type, size, folder_id, user_id, url)
        VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [name, type, size, folder_id || null, user_id, `/dummy/path/${name}`]
+      [finalName, type, size, folder_id || null, user_id, `/dummy/path/${finalName}`]
     );
 
-    res.status(201).json({ file: result.rows[0] });
+    res.status(201).json({ file: result.rows[0], renamed: finalName !== name });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 // Get files in a folder
 exports.getFilesByFolder = async (req, res) => {

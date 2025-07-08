@@ -70,25 +70,41 @@ const MyDrive = ({ activeTab }) => {
     }
   };
 
- const fetchFavorites = async () => {
+
+const fetchFavorites = async () => {
   try {
     const res = await API.get("/both/favorites");
-    const allFolders = res.data.favoriteFolders || [];
-    const allFiles = res.data.favoriteFiles || [];
 
-    const topLevelFolders = allFolders.filter(folder => folder.is_favorite);
-    const topLevelFiles = allFiles.filter(file => file.is_favorite && file.folder_id === null); // or adjust if needed
+    // Deduplicate by ID
+    const seenFileIds = new Set();
+    const uniqueFiles = [];
+    for (const file of res.data.favoriteFiles || []) {
+      if (!seenFileIds.has(file.id)) {
+        uniqueFiles.push(file);
+        seenFileIds.add(file.id);
+      }
+    }
+
+    const seenFolderIds = new Set();
+    const uniqueFolders = [];
+    for (const folder of res.data.favoriteFolders || []) {
+      if (!seenFolderIds.has(folder.id)) {
+        uniqueFolders.push(folder);
+        seenFolderIds.add(folder.id);
+      }
+    }
 
     setFavorites({
-      folders: topLevelFolders,
-      files: topLevelFiles,
-      allFolders,
-      allFiles
+      folders: uniqueFolders.filter(f => f.is_favorite),
+      files: uniqueFiles.filter(f => f.is_favorite && f.folder_id === null),
+      allFolders: uniqueFolders,
+      allFiles: uniqueFiles,
     });
   } catch (err) {
     console.error("Failed to fetch favorites:", err);
   }
 };
+
 
 
   const fetchRecent = async () => {
@@ -152,23 +168,33 @@ const MyDrive = ({ activeTab }) => {
     setFolderHistory(newHistory);
   };
 
-  const handleCreateFolder = async () => {
-    try {
-      await API.post("/folders/create", {
-        name: newFolderName,
-        parent_id: currentFolderId,
-      });
-      setNewFolderName("");
-      setShowNewFolderModal(false);
-      fetchDriveContents();
-    } catch (err) {
-      console.error("Folder creation failed:", err);
-    }
-  };
   
+  const handleCreateFolder = async () => {
+  try {
+    const res = await API.post("/folders/create", {
+      name: newFolderName,
+      parent_id: currentFolderId,
+    });
 
+    const createdFolder = res.data.folder;
+    const wasRenamed = res.data.renamed;
 
-const handleFileUpload = async (files) => {
+    if (wasRenamed) {
+      toast.info(`Folder created as "${createdFolder.name}" (renamed)`);
+    } else {
+      toast.success("Folder created successfully!");
+    }
+
+    setNewFolderName("");
+    setShowNewFolderModal(false);
+    fetchDriveContents();
+  } catch (err) {
+    console.error("Folder creation failed:", err);
+    toast.error("Failed to create folder.");
+  }
+};
+
+  const handleFileUpload = async (files) => {
   const uploads = Array.from(files).map(async (file) => {
     const metadata = {
       name: file.name,
@@ -178,7 +204,13 @@ const handleFileUpload = async (files) => {
     };
 
     try {
-      await API.post("/files/upload", metadata);
+      const res = await API.post("/files/upload", metadata);
+      const uploadedFile = res.data.file;
+      const wasRenamed = res.data.renamed;
+
+      if (wasRenamed) {
+        toast.info(`File uploaded as "${uploadedFile.name}" (renamed)`);
+      }
     } catch (err) {
       console.error(`Failed to upload ${file.name}:`, err);
       toast.error(`Upload failed: ${file.name}`);
@@ -186,9 +218,10 @@ const handleFileUpload = async (files) => {
   });
 
   await Promise.all(uploads);
-  toast.success("Files uploaded successfully!");
   fetchDriveContents();
 };
+
+
 
 const handleFileChange = async (e) => {
   const files = e.target.files;
@@ -584,34 +617,77 @@ const renderSingleCard = (item, type = "file") => {
         </>
       );
     }
-    
 
-   if (activeTab === "favorites") {
+
+
+
+if (activeTab === "favorites") {
   const { allFolders, allFiles } = favorites;
+  const favoritedFolderIds = new Set(allFolders.map(f => f.id));
 
-  const visibleFolders = allFolders.filter(
-    (f) => f.parent_id === currentFolderId
-  );
-  const visibleFiles = allFiles.filter(
-    (f) => f.folder_id === currentFolderId
-  );
+  // Step 1: Build parent-to-children map
+  const folderChildrenMap = {};
+  allFolders.forEach(f => {
+    if (!folderChildrenMap[f.parent_id]) folderChildrenMap[f.parent_id] = [];
+    folderChildrenMap[f.parent_id].push(f);
+  });
 
-  return (
-    <>
-      {currentFolderId && (
-  <div className="back-button-container">
-    <button className="back-button" onClick={goBack}>
-      <ArrowLeft className="icon" size={16} />
-      <span>Back</span>
-    </button>
-  </div>
-)}
+  // Step 2: Build set of all descendant folder IDs of top-level favorited folders
+  const getDescendants = (id, map, set) => {
+    if (!map[id]) return;
+    for (let child of map[id]) {
+      set.add(child.id);
+      getDescendants(child.id, map, set);
+    }
+  };
 
-      {renderGrid(visibleFolders, "folder")}
-      {renderGrid(visibleFiles, "file")}
-    </>
-  );
+  // Only include folders whose parent is not favorited
+  const topLevelFavorites = allFolders.filter(f => f.is_favorite && (!f.parent_id || !favoritedFolderIds.has(f.parent_id)));
+
+  const descendantIds = new Set();
+  topLevelFavorites.forEach(folder => getDescendants(folder.id, folderChildrenMap, descendantIds));
+
+  if (currentFolderId === null) {
+    // Show only top-level favorite folders and favorite files not inside those folders
+    const visibleFolders = topLevelFavorites;
+    const visibleFiles = allFiles.filter(f =>
+      f.is_favorite && (!f.folder_id || !favoritedFolderIds.has(f.folder_id))
+    );
+
+    return (
+      <>
+        {renderGrid(visibleFolders, "folder")}
+        {renderGrid(visibleFiles, "file")}
+      </>
+    );
+  } else {
+    // Inside a favorite folder — show direct children but exclude duplicates already shown at top
+    const visibleFolders = (folderChildrenMap[currentFolderId] || []).filter(
+      f => !topLevelFavorites.find(top => top.id === f.id)
+    );
+
+    const visibleFiles = allFiles.filter(f => f.folder_id === currentFolderId);
+
+    return (
+      <>
+        <div className="back-button-container">
+          <button className="back-button" onClick={goBack}>
+            <ArrowLeft className="icon" size={16} />
+            <span>Back</span>
+          </button>
+        </div>
+        {renderGrid(visibleFolders, "folder")}
+        {renderGrid(visibleFiles, "file")}
+      </>
+    );
+  }
 }
+
+
+
+
+
+
 
     if (activeTab === "recent") {
       const files = recent.filter((item) => item.type === "file");

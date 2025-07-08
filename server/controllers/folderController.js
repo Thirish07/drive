@@ -21,24 +21,56 @@ const getAllDescendantIds = async (folderId, userId) => {
 };
 
 // ✅ Create folder
+// exports.createFolder = async (req, res) => {
+//   const { name, parent_id } = req.body;
+//   const user_id = req.user.userId;
+
+//   const finalParentId = typeof parent_id !== 'undefined' ? parent_id : null;
+
+//   try {
+//     const result = await pool.query(
+//       `INSERT INTO folders (name, parent_id, user_id)
+//        VALUES ($1, $2, $3) RETURNING *`,
+//       [name, finalParentId, user_id]
+//     );
+
+//     res.status(201).json({ folder: result.rows[0] });
+//   } catch (err) {
+//     res.status(500).json({ error: err.message });
+//   }
+// };
 exports.createFolder = async (req, res) => {
   const { name, parent_id } = req.body;
   const user_id = req.user.userId;
 
   const finalParentId = typeof parent_id !== 'undefined' ? parent_id : null;
+  let finalName = name;
+  let counter = 1;
 
   try {
+    // Check for folder with same name
+    while (true) {
+      const existing = await pool.query(
+        `SELECT 1 FROM folders 
+         WHERE name = $1 AND parent_id IS NOT DISTINCT FROM $2 AND user_id = $3 AND deleted = FALSE`,
+        [finalName, finalParentId, user_id]
+      );
+      if (existing.rowCount === 0) break;
+      finalName = `${name} (${counter++})`;
+    }
+
     const result = await pool.query(
       `INSERT INTO folders (name, parent_id, user_id)
        VALUES ($1, $2, $3) RETURNING *`,
-      [name, finalParentId, user_id]
+      [finalName, finalParentId, user_id]
     );
 
-    res.status(201).json({ folder: result.rows[0] });
+    res.status(201).json({ folder: result.rows[0], renamed: finalName !== name });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 // ✅ Rename or Move Folder
 exports.updateFolder = async (req, res) => {
