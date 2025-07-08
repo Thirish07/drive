@@ -19,6 +19,7 @@ router.post('/favorite/:id', protect, folderController.markFolderFavorite);
 router.delete('/unfavorite/:id', protect, folderController.unmarkFolderFavorite);
 router.get('/shared/folder/:token', verifyTokenOrSharedAccess, folderController.getSharedFolderByToken);
 router.get('/:id/children', verifyTokenOrSharedAccess,folderController.getFolderChildren)
+router.get('/path/:id' , protect, folderController.navigation);
 
 
 module.exports = router;

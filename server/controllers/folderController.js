@@ -20,25 +20,7 @@ const getAllDescendantIds = async (folderId, userId) => {
   return descendants;
 };
 
-// ✅ Create folder
-// exports.createFolder = async (req, res) => {
-//   const { name, parent_id } = req.body;
-//   const user_id = req.user.userId;
 
-//   const finalParentId = typeof parent_id !== 'undefined' ? parent_id : null;
-
-//   try {
-//     const result = await pool.query(
-//       `INSERT INTO folders (name, parent_id, user_id)
-//        VALUES ($1, $2, $3) RETURNING *`,
-//       [name, finalParentId, user_id]
-//     );
-
-//     res.status(201).json({ folder: result.rows[0] });
-//   } catch (err) {
-//     res.status(500).json({ error: err.message });
-//   }
-// };
 exports.createFolder = async (req, res) => {
   const { name, parent_id } = req.body;
   const user_id = req.user.userId;
@@ -70,7 +52,6 @@ exports.createFolder = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
 
 // ✅ Rename or Move Folder
 exports.updateFolder = async (req, res) => {
@@ -163,8 +144,6 @@ exports.getFoldersByParent = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
-
 
 // Permanently delete folder
 exports.permanentlyDeleteFolder = async (req, res) => {
@@ -449,6 +428,33 @@ exports.unmarkFolderFavorite = async (req, res) => {
     if (result.rows.length === 0) return res.status(404).json({ error: "Folder not found" });
 
     res.json({ message: "Folder unmarked from favorite" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
+exports.navigation = async (req, res) => {
+  const folderId = parseInt(req.params.id, 10);
+  const userId = req.user.userId;
+  const path = [];
+
+  try {
+    let currentId = folderId;
+    while (currentId !== null) {
+      const result = await pool.query(
+        `SELECT id, name, parent_id FROM folders WHERE id = $1 AND user_id = $2`,
+        [currentId, userId]
+      );
+
+      if (result.rows.length === 0) break;
+
+      const folder = result.rows[0];
+      path.unshift({ id: folder.id, name: folder.name });
+      currentId = folder.parent_id;
+    }
+
+    res.json({ path });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

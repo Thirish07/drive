@@ -54,6 +54,7 @@ const MyDrive = ({ activeTab }) => {
   const [shareEmail, setShareEmail] = useState("");
   const [shareRole, setShareRole] = useState("viewer");
   const [sharedWithList, setSharedWithList] = useState([]);
+  const [currentFolderPath, setCurrentFolderPath] = useState([]);
 
   const fetchDriveContents = async () => {
     try {
@@ -156,17 +157,25 @@ const fetchFavorites = async () => {
     else fetchDriveContents();
   }, [activeTab, currentFolderId]);
 
-  const enterFolder = (folderId) => {
-    setFolderHistory((prev) => [...prev, currentFolderId]);
-    setCurrentFolderId(folderId);
-  };
+ 
+  const enterFolder = async (folderId) => {
+  setFolderHistory((prev) => [...prev, currentFolderId]);
+  setCurrentFolderId(folderId);
 
-  const goBack = () => {
-    const newHistory = [...folderHistory];
-    const prevId = newHistory.pop();
-    setCurrentFolderId(prevId || null);
-    setFolderHistory(newHistory);
-  };
+  try {
+    const res = await API.get(`/folders/path/${folderId}`); // assumes backend returns path array
+    setCurrentFolderPath(res.data.path); // path = [ { id, name }, ... ]
+  } catch (err) {
+    console.error("Failed to fetch folder path:", err);
+  }
+};
+const goBack = () => {
+  const newHistory = [...folderHistory];
+  const prevId = newHistory.pop();
+  setCurrentFolderId(prevId || null);
+  setFolderHistory(newHistory);
+  if (!prevId) setCurrentFolderPath([]); // reset path at root
+};
 
   
   const handleCreateFolder = async () => {
@@ -220,17 +229,11 @@ const fetchFavorites = async () => {
   await Promise.all(uploads);
   fetchDriveContents();
 };
-
-
-
 const handleFileChange = async (e) => {
   const files = e.target.files;
   if (!files || files.length === 0) return;
   await handleFileUpload(files); 
 };
-
-
-
   const toggleFavorite = async (id, isFav, type) => {
     try {
       if (type === "folder") {
@@ -356,8 +359,6 @@ const confirmMoveFolder = async () => {
     console.error("Move failed:", err);
   }
 };
-
-
    const openShareModal = (id, type) => {
     setShareFolderId(null);
     setShareFileId(null);
@@ -404,9 +405,6 @@ const confirmMoveFolder = async () => {
     console.error("Share failed:", error);
   }
 };
-
-
-
  const handleShareFile = async () => {
     try {
       const token = localStorage.getItem("accessToken");
@@ -791,34 +789,58 @@ if (activeTab === "favorites") {
             <Trash2 size={16} className="icon" /> Empty Trash
           </button>
         )}
+       
+
         {activeTab === "mydrive" && (
           
-  <div className="toolbar new-dropdown-wrapper left-align">
-    <div className="dropdown">
-      <button className="dropdown-toggle">
-        <Plus className="icon" /> New
-      </button>
-      <div className="dropdown-menu">
-        <div className="dropdown-item" onClick={() => setShowNewFolderModal(true)}>
-          <Folder className="icon" size={16} /> New Folder
+        <div className="toolbar new-dropdown-wrapper left-align">
+         <div className="dropdown">
+           <button className="dropdown-toggle">
+              <Plus className="icon" /> New
+           </button>
+           <div className="dropdown-menu">
+             <div className="dropdown-item" onClick={() => setShowNewFolderModal(true)}>
+                <Folder className="icon" size={16} /> New Folder
+             </div>
+              <div className="dropdown-item">
+              <label>
+                <UploadCloud className="icon" size={16} /> Upload File
+                <input type="file" onChange={handleFileChange} hidden />
+              </label>
+           </div>
+          </div>
         </div>
-        <div className="dropdown-item">
-          <label>
-            <UploadCloud className="icon" size={16} /> Upload File
-            <input type="file" onChange={handleFileChange} hidden />
-          </label>
-        </div>
-      </div>
-    </div>
 
-    {currentFolderId && (
-      <button onClick={goBack}>
-        <ArrowLeft className="icon" /> Back
+            {currentFolderId && (
+            <button onClick={goBack}>
+            <ArrowLeft className="icon" /> Back
       </button>
     )}
   </div>
-)}   
+
+)} 
+ 
   </div>
+   {(currentFolderPath.length > 0 || currentFolderId !== null) && (
+  <div className="breadcrumb">
+    <span className="breadcrumb-item" onClick={() => {
+      setCurrentFolderId(null);
+      setCurrentFolderPath([]);
+      setFolderHistory([]);
+    }}>My Drive</span>
+    {currentFolderPath.map((folder, index) => (
+      <span key={folder.id}>
+        {" / "}
+        <span
+          className="breadcrumb-item"
+          onClick={() => enterFolder(folder.id)}
+        >
+          {folder.name}
+        </span>
+      </span>
+    ))}
+  </div>
+)} 
       <div className="grid-view">{displayContent()}</div>
 
       {showNewFolderModal && (

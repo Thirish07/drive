@@ -416,3 +416,23 @@
   border: 2px dashed #4caf50;
   background-color: #f0fff4;
 }
+
+
+.breadcrumb {
+  margin: 10px 0 20px 0;
+  font-size: 15px;
+  color: #555;
+  padding-top: 0px;
+  padding-right:1000px;
+}
+
+.breadcrumb-item {
+  cursor: pointer;
+  color: #3988e8;
+  text-decoration:none;
+}
+
+.breadcrumb-item:hover {
+  text-decoration: none;
+}
+
