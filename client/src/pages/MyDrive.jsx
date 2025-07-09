@@ -8,11 +8,11 @@ import debounce from "lodash.debounce";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {
-  Folder,
+ // Folder,
   //FileText,
-  UploadCloud,
+  //UploadCloud,
   ArrowLeft,
-  Plus,
+  //Plus,
   Pencil,
   Trash2,
   Star,
@@ -24,14 +24,16 @@ import {
 } from "lucide-react";
 import "./MyDrive.css";
 
-const MyDrive = ({ activeTab }) => {
+//const MyDrive = ({ activeTab }) => {
+const MyDrive = ({ activeTab, showNewFolderModal, setShowNewFolderModal }) => {
+
   const [folders, setFolders] = useState([]);
   const [files, setFiles] = useState([]);
   const [currentFolderId, setCurrentFolderId] = useState(null);
   const [folderHistory, setFolderHistory] = useState([]);
   const [newFolderName, setNewFolderName] = useState("");
  
-  const [showNewFolderModal, setShowNewFolderModal] = useState(false);
+  //const [showNewFolderModal, setShowNewFolderModal] = useState(false);
   const [favorites, setFavorites] = useState({ folders: [], files: [], allFolders: [], allFiles: [] });
   const [recent, setRecent] = useState([]);
   const [trashed, setTrashed] = useState({ folders: [], files: [] });
@@ -150,12 +152,25 @@ const fetchFavorites = async () => {
     setSearchQuery(query);
     debouncedSearch(query);
   };
+  
   useEffect(() => {
-    if (activeTab === "favorites") fetchFavorites();
-    else if (activeTab === "recent") fetchRecent();
-    else if (activeTab === "trash") fetchTrash();
-    else fetchDriveContents();
-  }, [activeTab, currentFolderId]);
+  if (activeTab === "favorites") fetchFavorites();
+  else if (activeTab === "recent") fetchRecent();
+  else if (activeTab === "trash") fetchTrash();
+  else fetchDriveContents();
+
+  // Expose function globally for upload trigger
+  if (activeTab === "mydrive") {
+    window.refreshDriveContents = fetchDriveContents;
+  }
+
+  return () => {
+    // Clean up
+    if (window.refreshDriveContents) {
+      delete window.refreshDriveContents;
+    }
+  };
+}, [activeTab, currentFolderId]);
 
  
   const enterFolder = async (folderId) => {
@@ -229,11 +244,11 @@ const goBack = () => {
   await Promise.all(uploads);
   fetchDriveContents();
 };
-const handleFileChange = async (e) => {
-  const files = e.target.files;
-  if (!files || files.length === 0) return;
-  await handleFileUpload(files); 
-};
+// const handleFileChange = async (e) => {
+//   const files = e.target.files;
+//   if (!files || files.length === 0) return;
+//   await handleFileUpload(files); 
+// };
   const toggleFavorite = async (id, isFav, type) => {
     try {
       if (type === "folder") {
@@ -893,36 +908,6 @@ if (activeTab === "favorites") {
             <Trash2 size={16} className="icon" /> Empty Trash
           </button>
         )}
-       
-
-        {activeTab === "mydrive" && (
-          
-        <div className="toolbar new-dropdown-wrapper left-align">
-         <div className="dropdown">
-           <button className="dropdown-toggle">
-              <Plus className="icon" /> New
-           </button>
-           <div className="dropdown-menu">
-             <div className="dropdown-item" onClick={() => setShowNewFolderModal(true)}>
-                <Folder className="icon" size={16} /> New Folder
-             </div>
-              <div className="dropdown-item">
-              <label>
-                <UploadCloud className="icon" size={16} /> Upload File
-                <input type="file" onChange={handleFileChange} hidden />
-              </label>
-           </div>
-          </div>
-        </div>
-
-            {currentFolderId && (
-            <button onClick={goBack}>
-            <ArrowLeft className="icon" /> Back
-      </button>
-    )}
-  </div>
-
-)} 
  
   </div>
    {(currentFolderPath.length > 0 || currentFolderId !== null) && (

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api";
 import MyDrive from "./MyDrive";
+import { toast } from 'react-toastify';
 import "./DashboardPage.css";
 
 const DashboardPage = () => {
@@ -11,7 +12,47 @@ const DashboardPage = () => {
   const [showMenu, setShowMenu] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
   const [activeTab, setActiveTab] = useState("mydrive");
+  const [showNewDropdown, setShowNewDropdown] = useState(false);
+  const [currentFolderId, setCurrentFolderId] = useState(null);
+
+
+  const [showNewFolderModal, setShowNewFolderModal] = useState(false);
   const navigate = useNavigate();
+
+const handleFileChange = async (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  try {
+    const metadata = {
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      folder_id: currentFolderId,  // <-- 👈 use current folder context
+    };
+
+    const res = await API.post("/files/upload", metadata);
+    const uploadedFile = res.data.file;
+    const wasRenamed = res.data.renamed;
+
+    if (wasRenamed) {
+      toast.info(`File uploaded as "${uploadedFile.name}" (renamed)`);
+    } else {
+      toast.success("File uploaded successfully");
+    }
+
+    // Trigger refresh after upload
+    if (activeTab === "mydrive" && window.refreshDriveContents) {
+      window.refreshDriveContents();
+    }
+
+  } catch (error) {
+    console.error("File upload failed:", error);
+    toast.error("File upload failed");
+  }
+};
+
+
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -49,7 +90,7 @@ const DashboardPage = () => {
   };
 
   if (!user) return null;
-
+console.log("Dropdown visible?", showNewDropdown);
   return (
     <div className="dashboard-container">
       <div className="sidebar">
@@ -57,16 +98,54 @@ const DashboardPage = () => {
           <h2>📁 Drive System</h2>
         </div>
 
-        <div className={`tab-item ${activeTab === "mydrive" ? "active" : ""}`} onClick={() => setActiveTab("mydrive")}>
+        <div className={`tab-item ${activeTab === "mydrive" ? "active" : ""}`} onClick={() =>{ setActiveTab("mydrive"); setShowNewDropdown(false);}}>
           🗂️ My Drive
         </div>
-        <div className={`tab-item ${activeTab === "favorites" ? "active" : ""}`} onClick={() => setActiveTab("favorites")}>
+        {activeTab === "mydrive" && (
+  <div className="sidebar-new-dropdown">
+  <button
+    className="dropdown-toggle"
+    onClick={() => {
+      setShowNewDropdown((prev) => !prev);
+      console.log("Toggled:", !showNewDropdown); // 👈 debugging
+    }}
+  >
+    <span style={{ marginRight: "4px" }}>➕</span> New ▾
+  </button>
+
+  {showNewDropdown && (
+    <div className="dropdown-menu" style={{ background: "white", color: "black", zIndex: 9999 }}>
+      <div
+  className="dropdown-item"
+  onClick={() => {
+    setShowNewFolderModal(true);
+    setShowNewDropdown(false); // also hide the dropdown
+  }}
+>
+        📁 New Folder
+      </div>
+      <div className="dropdown-item">
+        <label>
+          📄 Upload File
+          <input type="file" onChange={handleFileChange} hidden />
+        </label>
+      </div>
+    </div>
+  )}
+</div>
+
+)}
+
+        <div className={`tab-item ${activeTab === "favorites" ? "active" : ""}`} onClick={() => {
+    setActiveTab("favorites");
+    setShowNewDropdown(false); // <-- add this
+  }} >
           ⭐ Favorites
         </div>
-        <div className={`tab-item ${activeTab === "recent" ? "active" : ""}`} onClick={() => setActiveTab("recent")}>
+        <div className={`tab-item ${activeTab === "recent" ? "active" : ""}`} onClick={() => {setActiveTab("recent"); setShowNewDropdown(false);}}>
           🕒 Recent
         </div>
-        <div className={`tab-item ${activeTab === "trash" ? "active" : ""}`} onClick={() => setActiveTab("trash")}>
+        <div className={`tab-item ${activeTab === "trash" ? "active" : ""}`} onClick={() => {setActiveTab("trash"); setShowNewDropdown(false);}}>
           🗑️ Trash
         </div>
 
@@ -87,12 +166,18 @@ const DashboardPage = () => {
       </div>
 
       <div className="content">
-        {showEditForm ? (
-          <EditUserForm user={user} setUser={setUser} setShowEditForm={setShowEditForm} />
-        ) : (
-          <MyDrive activeTab={activeTab} />
-        )}
-      </div>
+  {showEditForm ? (
+    <EditUserForm user={user} setUser={setUser} setShowEditForm={setShowEditForm} />
+  ) : (
+    <MyDrive
+      activeTab={activeTab}
+      showNewFolderModal={showNewFolderModal}
+      setShowNewFolderModal={setShowNewFolderModal}
+      currentFolderId={currentFolderId}
+      setCurrentFolderId={setCurrentFolderId}
+    />
+  )}
+</div>
     </div>
   );
 };

@@ -1,109 +1,4 @@
-/* .dashboard-container {
-  display: flex;
-  height: 100vh;
-  background: linear-gradient(to right, #f7f8fc, #e9ebf0);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
 
-.sidebar {
-  width: 250px;
-  background: #3f51b5;
-  color: white;
-  padding: 20px;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
-}
-
-.profile-header {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  padding: 10px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  transition: background 0.3s;
-}
-
-.profile-header:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.small-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: #ffffff;
-  color: #3f51b5;
-  font-size: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 10px;
-  font-weight: bold;
-}
-
-.profile-text {
-  font-size: 18px;
-  font-weight: 500;
-}
-
-.submenu {
-  list-style: none;
-  padding: 0;
-  margin-top: 20px;
-}
-
-.submenu li {
-  margin-bottom: 15px;
-  cursor: pointer;
-  transition: all 0.3s;
-  padding: 8px 10px;
-  border-radius: 5px;
-}
-
-.submenu li:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.content {
-  flex: 1;
-  padding: 50px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.edit-form {
-  background: #ffffff;
-  padding: 40px;
-  border-radius: 10px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 500px;
-}
-
-.edit-form input {
-  margin-bottom: 20px;
-  padding: 12px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  width: 100%;
-}
-
-.edit-form button {
-  padding: 12px;
-  font-size: 16px;
-  background: #3f51b5;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-.edit-form button:hover {
-  background: #283593;
-} */
 
 .dashboard-container {
   display: flex;
@@ -119,6 +14,7 @@
   flex-direction: column;
   padding: 20px;
   position: relative;
+  overflow: visible;
 }
 
 .sidebar-header h2 {
@@ -228,4 +124,66 @@
 
 .edit-form button:hover {
   background-color: #005fa3;
+}
+
+
+.sidebar-new-dropdown {
+  margin: 0.5rem 1rem;
+  position: relative; /* required to contain absolute dropdown */
+}
+
+
+ .sidebar-new-dropdown .dropdown-toggle {
+  background-color: #2196f3;      /* blue background */
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 930px;           /* pill shape */
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 70%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.2s ease;
+}
+.sidebar-new-dropdown .dropdown-toggle:hover {
+  background-color: #1976d2;
+}
+ 
+
+.sidebar-new-dropdown .dropdown-menu {
+  background: #fff; /* use white instead of blue */
+  color: #000;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  position: absolute;
+  top: 38px;
+  left: 0;
+  z-index: 1000;
+  padding: 8px 0;
+  margin-top: 5px;
+  width: 180px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.sidebar-new-dropdown .dropdown-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.sidebar-new-dropdown .dropdown-item:hover {
+  background-color: #f0f0f0;
+}
+.dropdown-menu {
+  background: white !important;
+  color: black !important;
+  position: absolute !important;
+  z-index: 9999 !important;
+  top: 40px !important;
+  left: 0 !important;
+  display: block !important;
 }
