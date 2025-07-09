@@ -475,105 +475,180 @@ const isDescendant = (folder, sourceId) => {
   }
   return false;
 };
+
 const renderSingleCard = (item, type = "file") => {
+  const isTrash = activeTab === "trash";
+  const showModified = activeTab === "recent";
+  const trashType = type === "folder" ? "folders" : "files";
+
   return (
     <div
-  className={`card ${type} cursor-pointer`}
-  onClick={() => {
-  if (type === "folder") {
-    enterFolder(item.id);
-    setSearchQuery("");
-    setSearchResults({ folders: [], files: [] });
-  } else if (type === "file") {
-    handleFileClick(item);
-  }
-}}
-  
->
+      className={`card ${type} cursor-pointer`}
+      onClick={() => {
+        if (type === "folder") {
+          enterFolder(item.id);
+          setSearchQuery("");
+          setSearchResults({ folders: [], files: [] });
+        } else {
+          handleFileClick(item);
+        }
+      }}
+    >
       <div className="card-header">
-        {/* {type === "folder" ? (
-          <Folder size={36} color="#f4b400" onClick={() => enterFolder(item.id)} />
-        ) : (
-          <FileText size={34} color="#4285f4" />
-        )} */}
-        {type === "folder" ? (
-          <span className="icon-folder" onClick={() => enterFolder(item.id)}>📁</span>
-        ) : (
-          <span className="icon-file">📄</span>
-        )}
-        <div className="actions">
-          <span onClick={(e) => { e.stopPropagation(); toggleFavorite(item.id, item.is_favorite, type); }} title={item.is_favorite ? "Unmark Favorite" : "Mark as Favorite"}>
-            {item.is_favorite ? <StarOff size={16} color="#fbbc05" /> : <Star size={16} color="#fbbc05" />}
+        <div
+          className="card-left"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (type === "folder") enterFolder(item.id);
+          }}
+        >
+          <span className={type === "folder" ? "icon-folder" : "icon-file"}>
+            {type === "folder" ? "📁" : "📄"}
           </span>
-          <span onClick={(e) => { e.stopPropagation(); openRenameModal(item.id, type === "folder" ? "folders" : "files", item.name); }}>
-            <Pencil size={16} title="Rename" />
-          </span>
-          <span onClick={(e) => { e.stopPropagation(); openMoveModal(item.id, type); }}>
-            <Move size={16} color="#5c6bc0" title={`Move ${type}`} />
-          </span>
-          <span onClick={(e) => { e.stopPropagation(); openShareModal(item.id, type); }}>
-            <Share2 size={16} color="#4caf50" title={`Share ${type}`} />
-          </span>
-          <span onClick={(e) => { e.stopPropagation(); softDelete(item.id, type === "folder" ? "folders" : "files"); }}>
-            <Trash2 size={16} color="#ea4335" title="Delete" />
+          <span className="item-name">
+            {searchQuery ? highlightMatch(item.name, searchQuery) : item.name}
           </span>
         </div>
+
+        <div className="actions">
+          {isTrash ? (
+            <>
+              <span
+                onClick={(e) => {
+                  e.stopPropagation();
+                  restoreItem(item.id, trashType);
+                }}
+                title="Restore"
+              >
+                <RotateCcw size={16} color="#34a853" />
+              </span>
+              <span
+                onClick={(e) => {
+                  e.stopPropagation();
+                  permanentDelete(item.id, trashType);
+                }}
+                title="Delete permanently"
+              >
+                <XCircle size={16} color="#ea4335" />
+              </span>
+            </>
+          ) : (
+            <>
+              <span
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleFavorite(item.id, item.is_favorite, type);
+                }}
+                title={item.is_favorite ? "Unmark Favorite" : "Mark as Favorite"}
+              >
+                {item.is_favorite ? (
+                  <StarOff size={16} color="#fbbc05" />
+                ) : (
+                  <Star size={16} color="#fbbc05" />
+                )}
+              </span>
+              <span
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openRenameModal(item.id, type === "folder" ? "folders" : "files", item.name);
+                }}
+                title="Rename"
+              >
+                <Pencil size={16} />
+              </span>
+              <span
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openMoveModal(item.id, type);
+                }}
+                title="Move"
+              >
+                <Move size={16} color="#5c6bc0" />
+              </span>
+              <span
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openShareModal(item.id, type);
+                }}
+                title="Share"
+              >
+                <Share2 size={16} color="#4caf50" />
+              </span>
+              <span
+                onClick={(e) => {
+                  e.stopPropagation();
+                  softDelete(item.id, trashType);
+                }}
+                title="Delete"
+              >
+                <Trash2 size={16} color="#ea4335" />
+              </span>
+            </>
+          )}
+        </div>
       </div>
-      <p>{searchQuery ? highlightMatch(item.name, searchQuery) : item.name}</p>
+
+      {showModified && item.updated_at && (
+        <small className="timestamp">
+          Last Modified: {new Date(item.updated_at).toLocaleString()}
+        </small>
+      )}
     </div>
   );
 };
 
 
-  const renderGrid = (items, type = "file", showModified = false, trashMode = false) => {
-    return items.map((item) => (
-      <div key={item.id} className={`card ${type}`}>
-        <div className="card-header">
-          {type === "folder" ? (
-            <Folder size={36} color="#f4b400" onClick={() => enterFolder(item.id)} />
-          ) : (
-            <FileText size={34} color="#4285f4" />
-          )}
-          <div className="actions">
-            {trashMode ? (
-              <>
-                <span onClick={() => restoreItem(item.id, type === "folder" ? "folders" : "files")} title="Restore">
-                  <RotateCcw size={16} color="#34a853" />
-                </span>
-                <span onClick={() => permanentDelete(item.id, type === "folder" ? "folders" : "files")} title="Permanently Delete">
-                  <XCircle size={16} color="#ea4335" />
-                </span>
-              </>
-            ) : (
-              <>
-                <span onClick={(e) => { e.stopPropagation(); toggleFavorite(item.id, item.is_favorite, type); }} title={item.is_favorite ? "Unmark Favorite" : "Mark as Favorite"}>
-                  {item.is_favorite ? <StarOff size={16} color="#fbbc05" /> : <Star size={16} color="#fbbc05" />}
-                </span>
-                <span onClick={(e) => { e.stopPropagation(); openRenameModal(item.id, type === "folder" ? "folders" : "files", item.name); }}>
-                  <Pencil size={16} title="Rename" />
-                </span>
+
+
+//   const renderGrid = (items, type = "file", showModified = false, trashMode = false) => {
+//     return items.map((item) => (
+//       <div key={item.id} className={`card ${type}`}>
+//         <div className="card-header">
+//           {type === "folder" ? (
+//             <Folder size={36} color="#f4b400" onClick={() => enterFolder(item.id)} />
+//           ) : (
+//             <FileText size={34} color="#4285f4" />
+//           )}
+//           <div className="actions">
+//             {trashMode ? (
+//               <>
+//                 <span onClick={() => restoreItem(item.id, type === "folder" ? "folders" : "files")} title="Restore">
+//                   <RotateCcw size={16} color="#34a853" />
+//                 </span>
+//                 <span onClick={() => permanentDelete(item.id, type === "folder" ? "folders" : "files")} title="Permanently Delete">
+//                   <XCircle size={16} color="#ea4335" />
+//                 </span>
+//               </>
+//             ) : (
+//               <>
+//                 <span onClick={(e) => { e.stopPropagation(); toggleFavorite(item.id, item.is_favorite, type); }} title={item.is_favorite ? "Unmark Favorite" : "Mark as Favorite"}>
+//                   {item.is_favorite ? <StarOff size={16} color="#fbbc05" /> : <Star size={16} color="#fbbc05" />}
+//                 </span>
+//                 <span onClick={(e) => { e.stopPropagation(); openRenameModal(item.id, type === "folder" ? "folders" : "files", item.name); }}>
+//                   <Pencil size={16} title="Rename" />
+//                 </span>
                 
-                    <span onClick={(e) => { e.stopPropagation(); openMoveModal(item.id, type); }}>
-  <Move size={16} color="#5c6bc0" title={`Move ${type}`} />
-</span>
-<span onClick={(e) => { e.stopPropagation(); openShareModal(item.id, type); }}>
-  <Share2 size={16} color="#4caf50" title={`Share ${type}`} />
-</span>          
-                <span onClick={(e) => { e.stopPropagation(); softDelete(item.id, type === "folder" ? "folders" : "files"); }}>
-                  <Trash2 size={16} color="#ea4335" title="Delete" />
-                </span>
-              </>
-            )}
-          </div>
-        </div>
-         <p>{searchQuery ? highlightMatch(item.name, searchQuery) : item.name}</p>
+//                     <span onClick={(e) => { e.stopPropagation(); openMoveModal(item.id, type); }}>
+//   <Move size={16} color="#5c6bc0" title={`Move ${type}`} />
+// </span>
+// <span onClick={(e) => { e.stopPropagation(); openShareModal(item.id, type); }}>
+//   <Share2 size={16} color="#4caf50" title={`Share ${type}`} />
+// </span>          
+//                 <span onClick={(e) => { e.stopPropagation(); softDelete(item.id, type === "folder" ? "folders" : "files"); }}>
+//                   <Trash2 size={16} color="#ea4335" title="Delete" />
+//                 </span>
+//               </>
+//             )}
+//           </div>
+//         </div>
+//          <p>{searchQuery ? highlightMatch(item.name, searchQuery) : item.name}</p>
        
-        {showModified && item.updated_at && (
-          <small className="timestamp">Last Modified: {new Date(item.updated_at).toLocaleString()}</small>
-        )}
-      </div>
-    ));
-  };
+//         {showModified && item.updated_at && (
+//           <small className="timestamp">Last Modified: {new Date(item.updated_at).toLocaleString()}</small>
+//         )}
+//       </div>
+//     ));
+//   };
   const highlightMatch = (text, query) => {
     const parts = text.split(new RegExp(`(${query})`, "gi"));
     return (
@@ -683,12 +758,24 @@ if (activeTab === "favorites") {
       f.is_favorite && (!f.folder_id || !favoritedFolderIds.has(f.folder_id))
     );
 
+    
     return (
-      <>
-        {renderGrid(visibleFolders, "folder")}
-        {renderGrid(visibleFiles, "file")}
-      </>
-    );
+  <>
+    {visibleFolders.map((folder) => (
+      <DroppableFolderCard key={folder.id} folder={folder} onDropItem={handleDragDropMove}>
+        <DraggableCard item={folder} type="folder">
+          {renderSingleCard(folder, "folder")}
+        </DraggableCard>
+      </DroppableFolderCard>
+    ))}
+    {visibleFiles.map((file) => (
+      <DraggableCard key={file.id} item={file} type="file">
+        {renderSingleCard(file, "file")}
+      </DraggableCard>
+    ))}
+  </>
+);
+
   } else {
     // Inside a favorite folder — show direct children but exclude duplicates already shown at top
     const visibleFolders = (folderChildrenMap[currentFolderId] || []).filter(
@@ -696,37 +783,65 @@ if (activeTab === "favorites") {
     );
 
     const visibleFiles = allFiles.filter(f => f.folder_id === currentFolderId);
-
     return (
-      <>
-        <div className="back-button-container">
-          <button className="back-button" onClick={goBack}>
-            <ArrowLeft className="icon" size={16} />
-            <span>Back</span>
-          </button>
-        </div>
-        {renderGrid(visibleFolders, "folder")}
-        {renderGrid(visibleFiles, "file")}
-      </>
-    );
+  <>
+    <div className="back-button-container">
+      <button className="back-button" onClick={goBack}>
+        <ArrowLeft className="icon" size={16} />
+        <span>Back</span>
+      </button>
+    </div>
+    {visibleFolders.map((folder) => (
+      <DroppableFolderCard key={folder.id} folder={folder} onDropItem={handleDragDropMove}>
+        <DraggableCard item={folder} type="folder">
+          {renderSingleCard(folder, "folder")}
+        </DraggableCard>
+      </DroppableFolderCard>
+    ))}
+    {visibleFiles.map((file) => (
+      <DraggableCard key={file.id} item={file} type="file">
+        {renderSingleCard(file, "file")}
+      </DraggableCard>
+    ))}
+  </>
+);
+
+
+    
   }
 }
 
+    
     if (activeTab === "recent") {
-      const files = recent.filter((item) => item.type === "file");
-      return (
-        <>
-          {renderGrid(files, "file", true)}
-        </>
-      );
-    }
+  const files = recent.filter((item) => item.type === "file");
+  return (
+    <>
+      {files.map((file) => (
+        <DraggableCard key={file.id} item={file} type="file">
+          {renderSingleCard(file, "file")}
+        </DraggableCard>
+      ))}
+    </>
+  );
+}
+
     if (activeTab === "trash") {
       return (
-        <>
-          {renderGrid(trashed.folders, "folder", false, true)}
-          {renderGrid(trashed.files, "file", false, true)}
-        </>
-      );
+  <>
+    {trashed.folders.map((folder) => (
+      <DroppableFolderCard key={folder.id} folder={folder} onDropItem={handleDragDropMove}>
+        <DraggableCard item={folder} type="folder">
+          {renderSingleCard(folder, "folder")}
+        </DraggableCard>
+      </DroppableFolderCard>
+    ))}
+    {trashed.files.map((file) => (
+      <DraggableCard key={file.id} item={file} type="file">
+        {renderSingleCard(file, "file")}
+      </DraggableCard>
+    ))}
+  </>
+);
     }
     return (
       <>
