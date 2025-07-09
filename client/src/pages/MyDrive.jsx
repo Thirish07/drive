@@ -491,10 +491,15 @@ const renderSingleCard = (item, type = "file") => {
   
 >
       <div className="card-header">
-        {type === "folder" ? (
+        {/* {type === "folder" ? (
           <Folder size={36} color="#f4b400" onClick={() => enterFolder(item.id)} />
         ) : (
           <FileText size={34} color="#4285f4" />
+        )} */}
+        {type === "folder" ? (
+          <span className="icon-folder" onClick={() => enterFolder(item.id)}>📁</span>
+        ) : (
+          <span className="icon-file">📄</span>
         )}
         <div className="actions">
           <span onClick={(e) => { e.stopPropagation(); toggleFavorite(item.id, item.is_favorite, type); }} title={item.is_favorite ? "Unmark Favorite" : "Mark as Favorite"}>

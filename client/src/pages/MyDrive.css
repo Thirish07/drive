@@ -66,7 +66,7 @@
   gap: 20px;
 }
 
-.card {
+/* .card {
   border: 1px solid #ddd;
   background-color: white;
   border-radius: 8px;
@@ -77,11 +77,33 @@
   transition: box-shadow 0.2s;
   position: relative;
   pointer-events: auto;
-}
+} 
 
 .card:hover {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}*/
+.card {
+  border: 1px solid #e0e0e0;
+  background-color: white;
+  border-radius: 10px;
+  padding: 12px;
+  width: 250px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s ease;
+  text-align: center;
+  position: relative;
 }
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+.icon-folder, .icon-file {
+  font-size: 34px;
+  cursor: pointer;
+  display:block;
+  margin: 0 auto 8px auto;
+}
+
 
 .card-header {
   display: flex;
@@ -89,23 +111,47 @@
   align-items: center;
   margin-bottom: 6px;
 }
-
+/* 
 .actions {
   display: flex;
   gap: 6px;
+} */
+ .actions {
+  display: none;
+  gap: 6px;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 6px;
+  padding: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
-.actions span {
+/* .actions span {
   cursor: pointer;
   transition: transform 0.2s;
   padding: 4px;
   border-radius: 4px;
   
+} */
+ /* .actions span:hover {
+  transform: scale(1.1);
+} */
+ .actions span {
+  cursor: pointer;
+  padding: 4px;
+  color: #444;
+  transition: color 0.2s ease;
+}
+.card:hover .actions {
+  display: flex;
+}
+.actions span:hover {
+  color: #000;
 }
 
-.actions span:hover {
-  transform: scale(1.1);
-}
+
 
 .card p {
   margin: 8px 0 4px;
