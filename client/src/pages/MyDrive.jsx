@@ -838,7 +838,7 @@ if (activeTab === "favorites") {
             : "My Drive"}
         </h2>
 
-       
+       <div className="search-wrapper">
           <div className="search-bar modern-search">
             <Search size={16} className="search-icon" />
              <input
@@ -852,6 +852,38 @@ if (activeTab === "favorites") {
               <button className="clear-search" onClick={() => handleSearch("")}>✕</button>
              )}
           </div>
+          {searchQuery && (searchResults.folders.length > 0 || searchResults.files.length > 0) && (
+            <div className="search-suggestions">
+              {searchResults.folders.map((folder) => (
+             <div
+               key={`sug-folder-${folder.id}`}
+               className="suggestion-item"
+               onClick={() => {
+               enterFolder(folder.id);
+               setSearchQuery("");
+               setSearchResults({ folders: [], files: [] });
+              }}
+              >
+              {folder.name}
+              </div>
+            ))}
+           {searchResults.files.map((file) => (
+        <div
+          key={`sug-file-${file.id}`}
+          className="suggestion-item"
+          onClick={() => {
+            handleFileClick(file);
+            setSearchQuery("");
+            setSearchResults({ folders: [], files: [] });
+          }}
+        >
+          {file.name}
+        </div>
+      ))}
+    </div>
+  )}
+</div>
+
 
           
        
