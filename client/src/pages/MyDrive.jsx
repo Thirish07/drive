@@ -9,7 +9,7 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {
   Folder,
-  FileText,
+  //FileText,
   UploadCloud,
   ArrowLeft,
   Plus,
@@ -20,7 +20,7 @@ import {
   RotateCcw,
   XCircle,
   Move,
-  Share2
+  Share2,Search
 } from "lucide-react";
 import "./MyDrive.css";
 
@@ -598,57 +598,6 @@ const renderSingleCard = (item, type = "file") => {
 };
 
 
-
-
-//   const renderGrid = (items, type = "file", showModified = false, trashMode = false) => {
-//     return items.map((item) => (
-//       <div key={item.id} className={`card ${type}`}>
-//         <div className="card-header">
-//           {type === "folder" ? (
-//             <Folder size={36} color="#f4b400" onClick={() => enterFolder(item.id)} />
-//           ) : (
-//             <FileText size={34} color="#4285f4" />
-//           )}
-//           <div className="actions">
-//             {trashMode ? (
-//               <>
-//                 <span onClick={() => restoreItem(item.id, type === "folder" ? "folders" : "files")} title="Restore">
-//                   <RotateCcw size={16} color="#34a853" />
-//                 </span>
-//                 <span onClick={() => permanentDelete(item.id, type === "folder" ? "folders" : "files")} title="Permanently Delete">
-//                   <XCircle size={16} color="#ea4335" />
-//                 </span>
-//               </>
-//             ) : (
-//               <>
-//                 <span onClick={(e) => { e.stopPropagation(); toggleFavorite(item.id, item.is_favorite, type); }} title={item.is_favorite ? "Unmark Favorite" : "Mark as Favorite"}>
-//                   {item.is_favorite ? <StarOff size={16} color="#fbbc05" /> : <Star size={16} color="#fbbc05" />}
-//                 </span>
-//                 <span onClick={(e) => { e.stopPropagation(); openRenameModal(item.id, type === "folder" ? "folders" : "files", item.name); }}>
-//                   <Pencil size={16} title="Rename" />
-//                 </span>
-                
-//                     <span onClick={(e) => { e.stopPropagation(); openMoveModal(item.id, type); }}>
-//   <Move size={16} color="#5c6bc0" title={`Move ${type}`} />
-// </span>
-// <span onClick={(e) => { e.stopPropagation(); openShareModal(item.id, type); }}>
-//   <Share2 size={16} color="#4caf50" title={`Share ${type}`} />
-// </span>          
-//                 <span onClick={(e) => { e.stopPropagation(); softDelete(item.id, type === "folder" ? "folders" : "files"); }}>
-//                   <Trash2 size={16} color="#ea4335" title="Delete" />
-//                 </span>
-//               </>
-//             )}
-//           </div>
-//         </div>
-//          <p>{searchQuery ? highlightMatch(item.name, searchQuery) : item.name}</p>
-       
-//         {showModified && item.updated_at && (
-//           <small className="timestamp">Last Modified: {new Date(item.updated_at).toLocaleString()}</small>
-//         )}
-//       </div>
-//     ));
-//   };
   const highlightMatch = (text, query) => {
     const parts = text.split(new RegExp(`(${query})`, "gi"));
     return (
@@ -889,20 +838,23 @@ if (activeTab === "favorites") {
             : "My Drive"}
         </h2>
 
-        {activeTab !== "trash" && (
-          <div className="search-bar">
-            <input
-              type="text"
-              placeholder="Search files and folders..."
-              value={searchQuery}
-              onChange={(e) => handleSearch(e.target.value)}
-              className="search-input"
-            />
-            {searchQuery && (
+       
+          <div className="search-bar modern-search">
+            <Search size={16} className="search-icon" />
+             <input
+             type="text"
+             placeholder="Search files and folders..."
+             value={searchQuery}
+             onChange={(e) => handleSearch(e.target.value)}
+             className="search-input"
+             />
+             {searchQuery && (
               <button className="clear-search" onClick={() => handleSearch("")}>✕</button>
-            )}
+             )}
           </div>
-        )}
+
+          
+       
 
         {activeTab === "trash" && (
           <button className="empty-trash-btn" onClick={openEmptyTrashModal}>
