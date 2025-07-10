@@ -516,3 +516,34 @@
 .suggestion-item:hover {
   background-color: #f1f3f4;
 }
+.action-menu-trigger {
+  cursor: pointer;
+  font-size: 18px;
+  padding: 4px;
+}
+.card-action-menu {
+  position: absolute;
+  right: 8px;
+  top: 28px;
+  background-color: white;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  border-radius: 4px;
+  z-index: 10;
+  min-width: 140px;
+}
+.card-action-menu .menu-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.card-action-menu .menu-item:hover {
+  background-color: #f5f5f5;
+}
+
+.card-action-menu .danger:hover {
+  background-color: #ffe6e6;
+  color: #d32f2f;
+}
+

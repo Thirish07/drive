@@ -32,7 +32,8 @@ const MyDrive = ({ activeTab, showNewFolderModal, setShowNewFolderModal }) => {
   const [currentFolderId, setCurrentFolderId] = useState(null);
   const [folderHistory, setFolderHistory] = useState([]);
   const [newFolderName, setNewFolderName] = useState("");
- 
+ const [activeMenuId, setActiveMenuId] = useState(null);
+
   //const [showNewFolderModal, setShowNewFolderModal] = useState(false);
   const [favorites, setFavorites] = useState({ folders: [], files: [], allFolders: [], allFiles: [] });
   const [recent, setRecent] = useState([]);
@@ -525,82 +526,82 @@ const renderSingleCard = (item, type = "file") => {
           </span>
         </div>
 
-        <div className="actions">
-          {isTrash ? (
-            <>
-              <span
-                onClick={(e) => {
-                  e.stopPropagation();
-                  restoreItem(item.id, trashType);
-                }}
-                title="Restore"
-              >
-                <RotateCcw size={16} color="#34a853" />
-              </span>
-              <span
-                onClick={(e) => {
-                  e.stopPropagation();
-                  permanentDelete(item.id, trashType);
-                }}
-                title="Delete permanently"
-              >
-                <XCircle size={16} color="#ea4335" />
-              </span>
-            </>
-          ) : (
-            <>
-              <span
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleFavorite(item.id, item.is_favorite, type);
-                }}
-                title={item.is_favorite ? "Unmark Favorite" : "Mark as Favorite"}
-              >
-                {item.is_favorite ? (
-                  <StarOff size={16} color="#fbbc05" />
-                ) : (
-                  <Star size={16} color="#fbbc05" />
-                )}
-              </span>
-              <span
-                onClick={(e) => {
-                  e.stopPropagation();
-                  openRenameModal(item.id, type === "folder" ? "folders" : "files", item.name);
-                }}
-                title="Rename"
-              >
-                <Pencil size={16} />
-              </span>
-              <span
-                onClick={(e) => {
-                  e.stopPropagation();
-                  openMoveModal(item.id, type);
-                }}
-                title="Move"
-              >
-                <Move size={16} color="#5c6bc0" />
-              </span>
-              <span
-                onClick={(e) => {
-                  e.stopPropagation();
-                  openShareModal(item.id, type);
-                }}
-                title="Share"
-              >
-                <Share2 size={16} color="#4caf50" />
-              </span>
-              <span
-                onClick={(e) => {
-                  e.stopPropagation();
-                  softDelete(item.id, trashType);
-                }}
-                title="Delete"
-              >
-                <Trash2 size={16} color="#ea4335" />
-              </span>
-            </>
-          )}
+       <div className="actions">
+  {!isTrash ? (
+    <>
+      <span
+        className="action-menu-trigger"
+        onClick={(e) => {
+          e.stopPropagation();
+          setActiveMenuId(activeMenuId === item.id ? null : item.id);
+        }}
+        title="More actions"
+      >
+        ⋮
+      </span>
+
+      {activeMenuId === item.id && (
+        <div
+          className="card-action-menu"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div
+            className="menu-item"
+            onClick={() => toggleFavorite(item.id, item.is_favorite, type)}
+          >
+            {item.is_favorite ? "★ Unfavorite" : "☆ Favorite"}
+          </div>
+          <div
+            className="menu-item"
+            onClick={() => openRenameModal(item.id, type === "folder" ? "folders" : "files", item.name)}
+          >
+            ✏️ Rename
+          </div>
+          <div
+            className="menu-item"
+            onClick={() => openMoveModal(item.id, type)}
+          >
+            📁 Move
+          </div>
+          <div
+            className="menu-item"
+            onClick={() => openShareModal(item.id, type)}
+          >
+            🔗 Share
+          </div>
+          <div
+            className="menu-item danger"
+            onClick={() => softDelete(item.id, trashType)}
+          >
+            🗑️ Delete
+          </div>
         </div>
+      )}
+    </>
+  ) : (
+    <>
+      <span
+        onClick={(e) => {
+          e.stopPropagation();
+          restoreItem(item.id, trashType);
+        }}
+        title="Restore"
+      >
+        <RotateCcw size={16} color="#34a853" />
+      </span>
+      <span
+        onClick={(e) => {
+          e.stopPropagation();
+          permanentDelete(item.id, trashType);
+        }}
+        title="Delete permanently"
+      >
+        <XCircle size={16} color="#ea4335" />
+      </span>
+    </>
+  )}
+</div>
+ 
       </div>
 
       {showModified && item.updated_at && (
