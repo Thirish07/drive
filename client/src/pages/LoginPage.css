@@ -8,6 +8,7 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  background: linear-gradient(to right, #e2e5ec, #436eda);
 }
 
 .login-card {

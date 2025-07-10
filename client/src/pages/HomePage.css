@@ -1,0 +1,143 @@
+/* pages/HomePage.css */
+
+.home-wrapper {
+  min-height: 100vh;
+  background: linear-gradient(to right, #e2e5ec, #436eda);
+  color: white;
+  font-family: 'Segoe UI', sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+.hero {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4rem 6rem;
+  animation: fadeIn 1.2s ease-in;
+}
+
+.hero-left {
+  flex: 1;
+  max-width: 50%;
+  padding-left: 10rem; /* added this */
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.brand h1 { 
+  font-size: 3.75rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.logo {
+  width: 90px;
+  height: 80px;
+  animation: popIn 0.6s ease;
+}
+
+.tagline {
+  font-size: 1.6rem;
+  color: #3c4044;
+  margin: 1rem 0 2rem;
+  line-height: 1.8;
+}
+
+.hero-buttons button {
+  margin-right: 16px;
+  padding: 14px 32px;
+  font-size: 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hero-buttons button:first-child {
+  background: #3b82f6;
+  color: white;
+}
+
+.hero-buttons button:last-child {
+  background: #64748b;
+  color: white;
+}
+
+.hero-buttons button:hover {
+  transform: translateY(-2px);
+  opacity: 0.92;
+}
+
+.hero-right {
+  flex: 1;
+  text-align: center;
+}
+
+.illustration {
+  width: 90%;
+  max-width: 460px;
+  animation: slideIn 1s ease;
+}
+
+/* .footer {
+  text-align: center;
+  padding: 1rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  font-size: 14px;
+  color: #94a3b8;
+} */
+
+@keyframes popIn {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  0% {
+    transform: translateX(40px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    flex-direction: column;
+    text-align: center;
+    padding: 3rem 2rem;
+  }
+
+  .hero-left, .hero-right {
+    max-width: 100%;
+  }
+
+  .hero-buttons button {
+    margin: 10px;
+    width: 160px;
+  }
+
+  .tagline {
+    font-size: 1.1rem;
+  }
+}

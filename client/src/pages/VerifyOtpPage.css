@@ -14,6 +14,7 @@
   justify-content: center;
   align-items: center;
   padding: 1.5rem;
+  background: linear-gradient(to right, #e2e5ec, #436eda);
 }
 
 .verify-form {

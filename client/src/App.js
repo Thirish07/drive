@@ -8,6 +8,8 @@ import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
 import ForgotResetPasswordPage from "./pages/ForgotResetPasswordPage";
 import SharedView from "./pages/SharedView";
+import HomePage from "./pages/HomePage"; // ← Add this
+
 
 
 
@@ -16,7 +18,9 @@ const App = () => {
      <DndProvider backend={HTML5Backend}>
     <Router>
       <Routes>
-        <Route path="/" element={<RegisterPage />} />
+        <Route path="/" element={<HomePage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        {/* <Route path="/" element={<RegisterPage />} /> */}
         <Route path="/verify-otp" element={<VerifyOtpPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotResetPasswordPage />} />
