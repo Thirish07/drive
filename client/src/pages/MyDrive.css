@@ -521,7 +521,7 @@
   font-size: 18px;
   padding: 4px;
 }
-.card-action-menu {
+/* .card-action-menu {
   position: absolute;
   right: 8px;
   top: 28px;
@@ -531,6 +531,18 @@
   border-radius: 4px;
   z-index: 10;
   min-width: 140px;
+} */
+ .card-action-menu {
+  position: absolute;
+  right: 8px;
+  top: 28px;
+  background-color: white;
+  color: black;
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  z-index: 999;
+  min-width: 150px;
+  padding: 4px 0;
 }
 .card-action-menu .menu-item {
   padding: 8px 12px;
@@ -545,5 +557,19 @@
 .card-action-menu .danger:hover {
   background-color: #ffe6e6;
   color: #d32f2f;
+}
+.menu-item {
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor:all-scroll;
+  transition: background 0.2s;
+}
+
+.menu-item:hover {
+  background-color: #f3f4f6;
+}
+
+.menu-item.danger {
+  color: #dc2626;
 }
 

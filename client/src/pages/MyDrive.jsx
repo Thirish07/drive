@@ -527,79 +527,92 @@ const renderSingleCard = (item, type = "file") => {
         </div>
 
        <div className="actions">
-  {!isTrash ? (
-    <>
-      <span
-        className="action-menu-trigger"
-        onClick={(e) => {
-          e.stopPropagation();
-          setActiveMenuId(activeMenuId === item.id ? null : item.id);
-        }}
-        title="More actions"
-      >
-        ⋮
-      </span>
+      {!isTrash ? (
+  <>
+    <span
+      className="action-menu-trigger"
+      onClick={(e) => {
+        e.stopPropagation();
+        setActiveMenuId(activeMenuId === item.id ? null : item.id);
+      }}
+      title="More actions"
+    >
+      ⋮
+    </span>
 
-      {activeMenuId === item.id && (
+    {activeMenuId === item.id && (
+      <div className="card-action-menu" onClick={(e) => e.stopPropagation()}>
         <div
-          className="card-action-menu"
-          onClick={(e) => e.stopPropagation()}
+          className="menu-item"
+          onClick={() => toggleFavorite(item.id, item.is_favorite, type)}
         >
-          <div
-            className="menu-item"
-            onClick={() => toggleFavorite(item.id, item.is_favorite, type)}
-          >
-            {item.is_favorite ? "★ Unfavorite" : "☆ Favorite"}
-          </div>
-          <div
-            className="menu-item"
-            onClick={() => openRenameModal(item.id, type === "folder" ? "folders" : "files", item.name)}
-          >
-            ✏️ Rename
-          </div>
-          <div
-            className="menu-item"
-            onClick={() => openMoveModal(item.id, type)}
-          >
-            📁 Move
-          </div>
-          <div
-            className="menu-item"
-            onClick={() => openShareModal(item.id, type)}
-          >
-            🔗 Share
-          </div>
-          <div
-            className="menu-item danger"
-            onClick={() => softDelete(item.id, trashType)}
-          >
-            🗑️ Delete
-          </div>
+          {item.is_favorite ? "★ Unfavorite" : "☆ Favorite"}
         </div>
-      )}
-    </>
-  ) : (
-    <>
-      <span
-        onClick={(e) => {
-          e.stopPropagation();
-          restoreItem(item.id, trashType);
-        }}
-        title="Restore"
-      >
-        <RotateCcw size={16} color="#34a853" />
-      </span>
-      <span
-        onClick={(e) => {
-          e.stopPropagation();
-          permanentDelete(item.id, trashType);
-        }}
-        title="Delete permanently"
-      >
-        <XCircle size={16} color="#ea4335" />
-      </span>
-    </>
-  )}
+        <div
+          className="menu-item"
+          onClick={() =>
+            openRenameModal(
+              item.id,
+              type === "folder" ? "folders" : "files",
+              item.name
+            )
+          }
+        >
+          ✏️ Rename
+        </div>
+        <div
+          className="menu-item"
+          onClick={() => openMoveModal(item.id, type)}
+        >
+          📁 Move
+        </div>
+        <div
+          className="menu-item"
+          onClick={() => openShareModal(item.id, type)}
+        >
+          🔗 Share
+        </div>
+        <div
+          className="menu-item danger"
+          onClick={() => softDelete(item.id, trashType)}
+        >
+          🗑️ Delete
+        </div>
+      </div>
+    )}
+  </>
+) : (
+  <>
+    <span
+      className="action-menu-trigger"
+      onClick={(e) => {
+        e.stopPropagation();
+        setActiveMenuId(activeMenuId === item.id ? null : item.id);
+      }}
+      title="More actions"
+    >
+      ⋮
+    </span>
+
+    {activeMenuId === item.id && (
+      <div className="card-action-menu" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="menu-item"
+          onClick={() => restoreItem(item.id, trashType)}
+        >
+          ♻️ Restore
+        </div>
+        <div
+          className="menu-item danger"
+          onClick={() => permanentDelete(item.id, trashType)}
+        >
+          ❌ Delete Permanently
+        </div>
+      </div>
+    )}
+  </>
+)}
+
 </div>
  
       </div>
