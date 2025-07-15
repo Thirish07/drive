@@ -25,11 +25,17 @@ import {
 import "./MyDrive.css";
 
 //const MyDrive = ({ activeTab }) => {
-const MyDrive = ({ activeTab, showNewFolderModal, setShowNewFolderModal }) => {
+const MyDrive = ({ 
+  activeTab, 
+  showNewFolderModal, 
+  setShowNewFolderModal, 
+  currentFolderId, 
+  setCurrentFolderId 
+}) => {
 
   const [folders, setFolders] = useState([]);
   const [files, setFiles] = useState([]);
-  const [currentFolderId, setCurrentFolderId] = useState(null);
+  //const [currentFolderId, setCurrentFolderId] = useState(null);
   const [folderHistory, setFolderHistory] = useState([]);
   const [newFolderName, setNewFolderName] = useState("");
  const [activeMenuId, setActiveMenuId] = useState(null);
