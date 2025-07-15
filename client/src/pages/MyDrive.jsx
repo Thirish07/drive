@@ -3,7 +3,7 @@ import API from "../api";
 import InvisibleDropzone from "../components/InvisibleDropzone";
 import DraggableCard from "../components/DraggableCard";
 import DroppableFolderCard from "../components/DroppableFolderCard";
-
+import { useDrop } from "react-dnd";
 import debounce from "lodash.debounce";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -451,6 +451,15 @@ const confirmMoveFolder = async () => {
     if (shareFolderId) handleShareFolder();
     else handleShareFile();
   };
+  const [{ isOverRoot }, dropToRootRef] = useDrop(() => ({
+  accept: ["folder", "file"],
+  drop: (draggedItem) => {
+    handleDropToRoot(draggedItem);
+  },
+  collect: (monitor) => ({
+    isOverRoot: monitor.isOver(),
+  }),
+}));
 
 
 const renderFolderOptions = (tree, level = 0) => {
@@ -919,10 +928,6 @@ if (activeTab === "favorites") {
   )}
 </div>
 
-
-          
-       
-
         {activeTab === "trash" && (
           <button className="empty-trash-btn" onClick={openEmptyTrashModal}>
             <Trash2 size={16} className="icon" /> Empty Trash
@@ -930,13 +935,28 @@ if (activeTab === "favorites") {
         )}
  
   </div>
-   {(currentFolderPath.length > 0 || currentFolderId !== null) && (
-  <div className="breadcrumb">
-    <span className="breadcrumb-item" onClick={() => {
-      setCurrentFolderId(null);
-      setCurrentFolderPath([]);
-      setFolderHistory([]);
-    }}>My Drive</span>
+   
+{activeTab !== "trash" && (currentFolderPath.length > 0 || currentFolderId !== null) && (
+  <div
+    className="breadcrumb"
+    ref={dropToRootRef}
+    style={{
+      backgroundColor: isOverRoot ? "#e0f7fa" : "transparent",
+      borderRadius: "6px",
+      padding: "4px 8px",
+    }}
+  >
+    <span
+      className="breadcrumb-item"
+      onClick={() => {
+        setCurrentFolderId(null);
+        setCurrentFolderPath([]);
+        setFolderHistory([]);
+      }}
+    >
+      My Drive
+    </span>
+
     {currentFolderPath.map((folder, index) => (
       <span key={folder.id}>
         {" / "}
@@ -949,7 +969,8 @@ if (activeTab === "favorites") {
       </span>
     ))}
   </div>
-)} 
+)}
+
       <div className="grid-view">{displayContent()}</div>
 
       {showNewFolderModal && (
